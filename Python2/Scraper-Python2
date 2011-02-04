@@ -19,7 +19,7 @@ def v_print(instr):
 def usage():
     v_print("==================================================")
     v_print("Usage: Scraper-Bash [OPTION] <thread url>")
-    v_print("Default OPTIONS: --output ./ --refresh 10")
+    v_print("Default OPTIONS: --output ./ --thread 10")
     v_print("Bash script to scrape 4chan, part of 4chantoolbox.")
     v_print("")
     v_print(" -o/--output set output dir")
@@ -55,6 +55,11 @@ for o, a in opts:
         refresh = int(a)
     else:
         assert False, "Unhandled Option"
+
+##Error check the given path
+if os.path.isdir(output) == False:
+    print "Given output location '" + output + "' is not a directory. EXITING!"
+    sys.exit(' ')
 
 ##Report which options we're using
 v_print("Downloading " + url)
