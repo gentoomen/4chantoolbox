@@ -6,13 +6,18 @@
 import os, sys, urllib, re, getopt
 from time import time, sleep
 
+## Defaults
+verbose = True
+output = ""
+refresh = 10
+url = ""
+
 ## Handle arguments
 try:                                
     opts, args = getopt.getopt(sys.argv, "hqo:r:", ["help", "quiet", "output", "refresh"])
 except getopt.GetoptError:
     print str(err)
     usage()
-    sys.exit(2) 
 
 for o, a in opts:
     if o == "-q":
@@ -25,7 +30,7 @@ for o, a in opts:
     elif o in ("-r", "--refresh"):
         refresh = a
     else:
-        url = o
+        assert False, "Unhandled Option"
 
 ## Main loop
 while 1:
@@ -53,3 +58,12 @@ while 1:
     if looptime < 10:
         print "Finished early. Sleeping for %d seconds." % (10 - looptime)
         sleep (10 - looptime)
+
+
+def usage():
+    print ' -------------------------------------------------------------------------'
+    print ' Created by the /g/entoomen for the purpose of shared learning and just   '
+    print ' plain having some handy tools. Released under the GPLv3.                 '
+    print ' '
+    print ' -------------------------------------------------------------------------'
+    sys.exit(' ')
