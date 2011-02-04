@@ -2,20 +2,26 @@
 #4chon image downloader
 #download pics from thread, reqs curl
 #ONLY timer options wurks, needs rewriting of code
-timer=45
-quiet=false
-output_dir=./
+verbose=true
+output="./"
+timer=10
 
 
-
-Quittan () {
-   printf "\rInterupted, ${#downloaded[*]} pics downloaded in total from $1"
+function Quittan() {
+   printf "\rInterupted, ${#downloaded[*]} pics downloaded in total from $url"
    echo
    exit 0
 }
 
-function Usage()
-{
+function Log() {
+if $verbose;then
+    echo $@
+else
+    return 1
+fi
+}
+
+function Usage() {
       echo "Usage: Scraper-Bash [OPTION] <thread url>"
       echo "Default OPTIONS: --output ./ --refresh 10"
       echo "Bash script to scrape 4chan, part of 4chantoolbox."
@@ -28,6 +34,14 @@ function Usage()
       echo "insert <witty comment> here"
 }
 
+Check_args() {
+
+if [ -z "$1" ]; then
+
+    Usage
+    exit 1
+fi
+
 while getopts ":ho:qr" OPTION; do
     case $OPTION in
     h)
@@ -36,15 +50,16 @@ while getopts ":ho:qr" OPTION; do
     ;;
     o)
         if [ -d $OPTARG ]; then
-            OUTDIR=$OPTARG
+            output=$OPTARG
             shift $((OPTIND-1)); OPTIND=1
         else
-            Usage
+            echo "Given output location $OPTARG is not a valid directory. EXITING!"
+            #Usage
             exit 1
         fi
     ;;
     q)
-        QUIET=True
+        verbose=false
         shift $((OPTIND-1)); OPTIND=1
     ;;
     r)
@@ -53,32 +68,54 @@ while getopts ":ho:qr" OPTION; do
     ;;
     \?)
         Usage
-        exit 1
+        exit 0
     ;;
   esac
 done
 
+if [ -z "$1" ]; then
+    Usage
+    exit 1
+else
+    url="$1"
+fi
+}
+
 trap "Quittan $1" INT TERM
+Check_args $@
+Log "Downloading $url"
+Log "Saving to location $output"
+Log "Timer set to every $timer seconds."
+
 while (true); do
-   printf "\rUpdating...          / $last new pics / $total pics total / $1"
-   urls=$( curl -s "$1" | egrep -o 'http://(images|img|cgi).4chan.org/[a-z0-9]+/src/[0-9]*\.(jpg|png|gif)' | sed 'n;d;' )
+
+   #printf "\rUpdating...          / $last new pics / $total pics total / $1"
+
+   urls=$( curl -s "$url" | egrep -o 'http://(images|img|cgi).4chan.org/[a-z0-9]+/src/[0-9]*\.(jpg|png|gif)' | sed 'n;d;' )
+   Log "Page $url downloaded. Processing images."
+
    [[ -z $urls ]] && printf "\rThread 404 or fail crap, ${#downloaded[*]} pics downloaded in total from $1" && echo && exit 0
    urlist=( $urls )
    index=0
    for u in ${urlist[@]}; do
+        imagename="${u##*/}"
       for i in ${downloaded[@]}; do
          if [[ $u == $i ]]; then
+            Log "File $output$imagename exists. Skipping."
             continue 2
          fi
       done
-      { curl -s -O "$u" && downloaded+=("$u"); } || { echo "Failed to download $u" && exit 1; }
+        Log "Getting $imagename"
+      { curl -s "$u" > $output$imagename && downloaded+=("$u"); } || { echo "Failed to download $u" && exit 1; }
       let index++
    done
     secs=$timer
+    Log "Updating in $timer secs / $index new pics / ${#downloaded[*]} pics total / $url"
     while [ $secs -ge 0 ]; do
       sleep 1 &
-      printf "\rUpdating in %02d:%02d:%02d / $index new pics / ${#downloaded[*]} pics total / $1" $((secs/3600)) $(( (secs/60)%60)) $((secs%60))
+
       secs=$(( $secs - 1 ))
       wait
-   done
+    done
+
 done
