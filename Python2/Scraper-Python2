@@ -6,15 +6,28 @@
 import os, sys, urllib, re, getopt
 from time import time, sleep
 
-for arg in sys.argv:
-    url = arg
-
+## Handle arguments
 try:                                
     opts, args = getopt.getopt(sys.argv, "hqo:r:", ["help", "quiet", "output", "refresh"])
 except getopt.GetoptError:
-#    usage()
+    print str(err)
+    usage()
     sys.exit(2) 
 
+for o, a in opts:
+    if o == "-q":
+        verbose = False
+    elif o in ("-h", "--help"):
+        usage()
+        sys.exit()
+    elif o in ("-o", "--output"):
+        output = a
+    elif o in ("-r", "--refresh"):
+        refresh = a
+    else:
+        url = o
+
+## Main loop
 while 1:
     lasttime = time()
 
