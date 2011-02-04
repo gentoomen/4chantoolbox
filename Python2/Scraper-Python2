@@ -3,11 +3,17 @@
 ## Written by LAMMJohnson
 ## If something goes wrong, it's your fault so eat shit.
 
-import os, sys, urllib, re
+import os, sys, urllib, re, getopt
 from time import time, sleep
 
 for arg in sys.argv:
     url = arg
+
+try:                                
+    opts, args = getopt.getopt(sys.argv, "hqo:r:", ["help", "quiet", "output", "refresh"])
+except getopt.GetoptError:
+#    usage()
+    sys.exit(2) 
 
 while 1:
     lasttime = time()
