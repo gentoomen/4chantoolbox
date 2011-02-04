@@ -1,10 +1,10 @@
 /*
  *  4chantoolbox - Educational Yotsuba scripts and tools.
  *  Copyright 2011 gentoomen. All rights reserved.
- *	This file is distributed under the terms of the Do What The Fuck You Want To Public License, Version 2.
+ *  This file is distributed under the terms of the Do What The Fuck You Want To Public License, Version 2.
  *  	Or, at the discretion of the project, any comparable license chosen.
  * 
- *	Scraper-ChanKit.m - ChanKit-based image fetcher.
+ *  Scraper-ChanKit.m - ChanKit-based image fetcher.
  */
 
 #import <Cocoa/Cocoa.h>
