@@ -10,9 +10,16 @@
 #import <Cocoa/Cocoa.h>
 
 int main (int argc, const char * argv[]) {
+	// An AutoreleasePool should be set up manually for processes that have their own single run loop; in Cocoa GUI programs this is managed by the system.
+	// This will automatically take care of any autoreleased objects instantiated within its scope.
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-		
+	
+	// The standardUserDefaults singleton contains all preferences associated with the running program, including command line arguments
+	// However, this is limited to args in the form "-key value". Usually a fair trade-off since it's so much nicer than getopt.
 	NSUserDefaults* args = [NSUserDefaults standardUserDefaults];
+	// Normally to check for the presence of command line arguments we'd do the following
+	//		[[args volatileDomainForName:NSArgumentDomain] count]
+	// However in our case we can't do anything without -u being set anyway, so we should just bail out if that isn't present.
 	if(![args objectForKey:@"u"]) {
 	    NSLog( @"\nObjective-C sample application to scrape 4chan, part of 4chantoolbox.\n"
 	    		"\n"
@@ -25,11 +32,14 @@ int main (int argc, const char * argv[]) {
 		return 0;
 	}
 	
+	// Now we can just ask the userdefaults for a string associated with flag "u"
 	NSURL* url = [NSURL URLWithString:[args stringForKey:@"u"]];
 	NSString* output;
 	if([args objectForKey:@"o"])
+		// stringByStandardizingPath is a great method that sanitizes a path by expanding tildes, resolving symlinks, compacting extraneous ./, etc
 		output = [[args stringForKey:@"o"] stringByStandardizingPath];
 	else 
+		// No directory provided, default is cwd
 		output = [[NSFileManager defaultManager] currentDirectoryPath];
 	NSInteger refresh = 10;
 	if([args objectForKey:@"t"])
@@ -40,19 +50,23 @@ int main (int argc, const char * argv[]) {
 	if(refresh)	NSLog(@"Timer set to every %d seconds.",refresh);
 
 	NSXMLDocument* thread;
-	NSUInteger lastindex = 0;
-	NSError* e = nil;
+	NSUInteger lastindex = 0; // Don't bother with images that have already been processed
+	NSError* e = nil; // If something goes wrong with the thread this will tell us the specific error
 	NSUInteger downtot = 0;
 	do {
+		// It's a good idea to create an inner autorelease pool for loops where many objects may be allocated; this keeps our memory footprint as small as possible
 		NSAutoreleasePool* loop = [[NSAutoreleasePool alloc] init];
 		NSDate* lasttime = [NSDate date];
+		// NSXMLDocument provides a full XML DOM parser with tidying support and XPath/XQuery methods which we'll use to get the elements we want
 		thread = [[NSXMLDocument alloc] initWithContentsOfURL:url options:NSXMLDocumentTidyHTML error:&e];
+		// if(thread != nil) if you prefer, but nil is always boolean false
 		if(thread)
 			NSLog(@"%@ successfully fetched.",url);
 		else
 			NSLog(@"Failed to fetch %@, error: %@",url,[e localizedDescription]);
 		NSArray* images = [thread nodesForXPath:@"/html/body/form//a[img[@md5]]/@href" error:NULL];
 		[thread release];
+		// This if could be avoided if we weren't tracking a range that might no longer exist
 		if([images count] > lastindex) {
 			for(NSXMLNode* imagenode in [images subarrayWithRange:NSMakeRange(lastindex,[images count]-lastindex)]) {
 				NSString* image = [imagenode stringValue];
@@ -70,6 +84,7 @@ int main (int argc, const char * argv[]) {
 		NSTimeInterval looptime = [[NSDate date] timeIntervalSinceDate:lasttime];
 		[loop drain];
 		NSLog(@"Finished in %0.2f seconds.",looptime);
+		// No need for looptime at this point so may as well reuse it in the most obnoxious way possible
 		if((looptime = refresh - looptime) > 0) {
 			NSLog(@"Sleeping for %0.2f seconds.",looptime);
 			[NSThread sleepForTimeInterval:looptime];
