@@ -11,9 +11,16 @@
 #import <ChanKit/ChanKit.h>
 
 int main (int argc, const char * argv[]) {
+	// An AutoreleasePool should be set up manually for processes that have their own single run loop; in Cocoa GUI programs this is managed by the system.
+	// This will automatically take care of any autoreleased objects instantiated within its scope.
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	
+	// The standardUserDefaults singleton contains all preferences associated with the running program, including command line arguments
+	// However, this is limited to args in the form "-key value". Usually a fair trade-off since it's so much nicer than getopt.
 	NSUserDefaults* args = [NSUserDefaults standardUserDefaults];
+	// Normally to check for the presence of command line arguments we'd do the following
+	//		[[args volatileDomainForName:NSArgumentDomain] count]
+	// However in our case we can't do anything without -u being set anyway, so we should just bail out if that isn't present.
 	if(![args objectForKey:@"u"]) {
 	    NSLog( @"\nObjective-C sample application to scrape 4chan, part of 4chantoolbox.\n"
 			  	"ChanKit v%@\n"
@@ -27,12 +34,15 @@ int main (int argc, const char * argv[]) {
 		return 0;
 	}	
 
+	// Now we can just ask the userdefaults for a string associated with flag "u"
 	NSURL* url = [NSURL URLWithString:[args stringForKey:@"u"]];
 	NSFileManager* filemanager = [NSFileManager defaultManager];
 	NSString* output;
 	if([args objectForKey:@"o"])
+		// stringByStandardizingPath is a great method that sanitizes a path by expanding tildes, resolving symlinks, compacting extraneous ./, etc
 		output = [[args stringForKey:@"o"] stringByStandardizingPath];
 	else 
+		// No directory provided, default is cwd
 		output = [[NSFileManager defaultManager] currentDirectoryPath];	
 	NSInteger refresh = 10;
 	if([args objectForKey:@"t"])
@@ -42,22 +52,28 @@ int main (int argc, const char * argv[]) {
 	NSLog(@"Saving to location %@",output);
 	if(refresh)	NSLog(@"Timer set to every %d seconds.",refresh);
 
+	// This ChanKit method will prepare a thread for downloading from a given URL, but not actually hit the network until populate is called. We rely on this separation to simplify the loop.
 	CKThread* thread = [CKThread threadReferencingURL:url];
-	NSUInteger lastindex = 0;
-	int status;
+	NSUInteger lastindex = 0; // Don't bother with images that have already been processed
+	int status;	// This will keep track of the thread's status; if it 404s, we go offline, or any other error occurs it will abort the loop
 	NSUInteger downtot = 0;
 	do {
+		// It's a good idea to create an inner autorelease pool for loops where many objects may be allocated; this keeps our memory footprint as small as possible
 		NSAutoreleasePool* loop = [[NSAutoreleasePool alloc] init];
 		NSDate* lasttime = [NSDate date];		
+		// Download and parse the thread
 		status = [thread populate];
 		if(status == CK_ERR_SUCCESS)
 			NSLog(@"Thread #%@ successfully fetched.",thread.IDString);
 		else
 			NSLog(@"Failed to fetch %@, error code: %d",thread.URL,status);
+		// Sure would be nice to have a subarrayFromIndex: method. If we weren't watching the thread we could simply use:
+		//		for(CKImage* image in thread.images)
 		for(CKImage* image in [thread.images subarrayWithRange:NSMakeRange(lastindex,thread.imagecount-lastindex)]) {
 			NSString* fullpath = [output stringByAppendingPathComponent:image.name];
 			if([filemanager fileExistsAtPath:fullpath])
 				NSLog(@"%@ exists, skipping.",fullpath);
+			// We use some of the extra metadata provided by Yotsuba to write the original filename as well as tag the modification date as the time it was uploaded to the server
 			else if([filemanager createFileAtPath:fullpath contents:image.data attributes:[NSDictionary dictionaryWithObject:image.timestamp forKey:@"NSFileModificationDate"]]) {
 				NSLog(@"%@ saved to %@",image.URL,fullpath);
 				downtot++;
@@ -68,6 +84,7 @@ int main (int argc, const char * argv[]) {
 		NSTimeInterval looptime = [[NSDate date] timeIntervalSinceDate:lasttime];
 		[loop drain];
 		NSLog(@"Finished in %0.2f seconds.",looptime);
+		// No need for looptime at this point so may as well reuse it in the most obnoxious way possible
 		if((looptime = refresh - looptime) > 0) {
 			NSLog(@"Sleeping for %0.2f seconds.",looptime);
 			[NSThread sleepForTimeInterval:looptime];
@@ -75,9 +92,11 @@ int main (int argc, const char * argv[]) {
 	} while(refresh && status == CK_ERR_SUCCESS);
 	
 	if(downtot) {
+		// Welcome to date handling in Cocoa
 		NSDateFormatter* dateformat = [[NSDateFormatter alloc] init];
 		[dateformat setDateFormat:@"MM/dd/yy(EEE)HH:mm:ss"];
 		NSArray* imageposts = thread.imagePosts;
+		// Just because we can
 		NSLog(@"%@: got %d images total between %@ and %@.",thread.URL,downtot,	[dateformat stringFromDate:[[imageposts objectAtIndex:0] date]],
 																				[dateformat stringFromDate:[[imageposts lastObject] date]]);
 		[dateformat release];
