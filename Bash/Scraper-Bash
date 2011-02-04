@@ -1,0 +1,34 @@
+xx#!/bin/bash
+#4chon image downloader
+#download pics from thread
+#reqs curl
+timer=45
+Quittan () {
+   printf "\rInterupted, ${#downloaded[*]} pics downloaded in total from $1"
+   echo
+   exit 0
+}
+trap "Quittan $1" INT TERM
+while (true); do
+   printf "\rUpdating...          / $last new pics / $total pics total / $1"
+   urls=$( curl -s "$1" | egrep -o 'http://(images|img|cgi).4chan.org/[a-z0-9]+/src/[0-9]*\.(jpg|png|gif)' | sed 'n;d;' )
+   [[ -z $urls ]] && printf "\rThread 404 or fail crap, ${#downloaded[*]} pics downloaded in total from $1" && echo && exit 0 
+   urlist=( $urls )
+   index=0
+   for u in ${urlist[@]}; do
+      for i in ${downloaded[@]}; do
+         if [[ $u == $i ]]; then
+            continue 2
+         fi
+      done
+      { curl -s -O "$u" && downloaded+=("$u"); } || { echo "Failed to download $u" && exit 1; }
+      let index++
+   done
+    secs=$timer
+    while [ $secs -ge 0 ]; do
+      sleep 1 &
+      printf "\rUpdating in %02d:%02d:%02d / $index new pics / ${#downloaded[*]} pics total / $1" $((secs/3600)) $(( (secs/60)%60)) $((secs%60))
+      secs=$(( $secs - 1 ))
+      wait
+   done
+done
