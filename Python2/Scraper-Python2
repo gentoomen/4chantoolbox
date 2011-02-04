@@ -11,6 +11,9 @@ verbose = True
 output = "./"
 refresh = 10
 
+## Globals
+downtot = 0
+
 ##Functions
 def v_print(instr):
     if verbose:
@@ -68,33 +71,40 @@ v_print("Timer set to every " + str(refresh) + " seconds.")
 
 ## Main loop
 while 1:
-    lasttime = time()
+    try:
+        lasttime = time()
 
-    # Grab the page and split out the image URLS
-    html = urllib.urlopen(url);
-    v_print("Page " + url + " downloaded. Processing images.")
-    images = re.findall('http://images.4chan.org/g/src/\d{13}.(?:png|gif|jpg)', html.read())
+        # Grab the page and split out the image URLS
+        html = urllib.urlopen(url);
+        v_print("Page " + url + " downloaded. Processing images.")
+        images = re.findall('http://images.4chan.org/g/src/\d{13}.(?:png|gif|jpg)', html.read())
 
-    for image in images:
-        # Split the image name from the URL and get a full path to write to
-        imagename = re.search('src/(.*$)', image)
-        imagename = imagename.group(1)
-        fullpath = output + imagename
+        for image in images:
+            # Split the image name from the URL and get a full path to write to
+            imagename = re.search('src/(.*$)', image)
+            imagename = imagename.group(1)
+            fullpath = output + imagename
 
-        # Get the file if necessary
-        if os.path.exists(fullpath):
-            v_print("File \'" + fullpath + "' exists. Skipping.")
-        else:
-            v_print("Getting " + image)
-            u = urllib.urlopen(image)
-            localFile = open(fullpath, 'w')
-            localFile.write(u.read())
-            localFile.close()
+            # Get the file if necessary
+            if os.path.exists(fullpath):
+                v_print("File \'" + fullpath + "' exists. Skipping.")
+            else:
+                v_print("Getting " + image)
+                u = urllib.urlopen(image)
+                localFile = open(fullpath, 'w')
+                localFile.write(u.read())
+                localFile.close()
+                downtot += 1
 
-    # Timer
-    looptime = int(time() - lasttime);
-    lasttime = time();
-    v_print("Finished in " + str(looptime) + " seconds.")
-    if looptime < refresh:
-        v_print("Sleeping for " + str(refresh - looptime) + " seconds.")
-        sleep (refresh - looptime)
+        # Timer
+        looptime = int(time() - lasttime);
+        lasttime = time();
+        v_print("Finished in " + str(looptime) + " seconds.")
+        if looptime < refresh:
+            v_print("Sleeping for " + str(refresh - looptime) + " seconds.")
+            sleep (refresh - looptime)
+
+    # Handle the keyboard interrupt event
+    except (KeyboardInterrupt, SystemExit):
+        print "\nInterupted. "  + str(downtot) + " pics downloaded in total from " + url
+        sys.exit('')
