@@ -17,7 +17,7 @@ end
 
 def usage
     v_print "=================================================="
-    v_print "Usage: Scraper-Python2 [OPTION] <thread url>"
+    v_print "Usage: Scraper-Ruby [OPTION] <thread url>"
     v_print "Default OPTIONS: --output ./ --thread 10"
     v_print "Bash script to scrape 4chan, part of 4chantoolbox."
     v_print ""
