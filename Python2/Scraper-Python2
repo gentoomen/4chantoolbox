@@ -8,6 +8,7 @@ from time import time, sleep
 
 ##Functions
 def usage():
+    print "=================================================="
     print "Usage: Scraper-Bash [OPTION] <thread url>"
     print "Default OPTIONS: --output ./ --refresh 10"
     print "Bash script to scrape 4chan, part of 4chantoolbox."
@@ -18,11 +19,12 @@ def usage():
     print " -h/--help this message"
     print ""
     print "insert <witty comment> here"
+    print "=================================================="
     sys.exit(' ')
 
 ## Defaults
 verbose = True
-output = ""
+output = "./"
 refresh = 10
 
 ## Handle URL arg
@@ -43,15 +45,17 @@ for o, a in opts:
         verbose = False
     elif o in ("-h", "--help"):
         usage()
-        sys.exit()
     elif o in ("-o", "--output"):
         output = a
     elif o in ("-t", "--timer"):
-        refresh = a
+        refresh = int(a)
     else:
         assert False, "Unhandled Option"
 
-print output
+##Report which options we're using
+print "Downloading " + url
+print "Saving to location " + output
+print "Timer set to every " + str(refresh) + " seconds."
 
 ## Main loop
 while 1:
@@ -75,8 +79,9 @@ while 1:
             localFile.write(u.read())
             localFile.close()
 
-    looptime = time() - lasttime;
+    looptime = int(time() - lasttime);
     lasttime = time();
+    print "Finished in %d seconds." % looptime
     if looptime < refresh:
-        print "Finished early. Sleeping for %d seconds." % (10 - looptime)
-        sleep (10 - looptime)
+        print "Sleeping for %d seconds." % (refresh - looptime)
+        sleep (refresh - looptime)
