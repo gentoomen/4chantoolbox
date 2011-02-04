@@ -1,0 +1,36 @@
+#!/usr/bin/python2.7
+
+## Written by LAMMJohnson
+## If something goes wrong, it's your fault so eat shit.
+
+import os, sys, urllib, re
+from time import time, sleep
+
+for arg in sys.argv:
+    url = arg
+
+while 1:
+    lasttime = time()
+
+    html = urllib.urlopen(url);
+    print "Page %s downloaded. Processing images." % url
+    images = re.findall('http://images.4chan.org/g/src/\d{13}.(?:png|gif|jpg)', html.read())
+
+    for image in images:
+        imagename = re.search('src/(.*$)', image)
+        imagename = imagename.group(1)
+
+        if os.path.exists(imagename):
+            print "File \'%s' exists. Skipping." % imagename
+        else:
+            print "Getting %s" % image
+            u = urllib.urlopen(image)
+            localFile = open(imagename, 'w')
+            localFile.write(u.read())
+            localFile.close()
+
+    looptime = time() - lasttime;
+    lasttime = time();
+    if looptime < 10:
+        print "Finished early. Sleeping for %d seconds." % (10 - looptime)
+        sleep (10 - looptime)
