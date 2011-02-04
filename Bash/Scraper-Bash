@@ -1,18 +1,68 @@
-xx#!/bin/bash
+#!/bin/bash
 #4chon image downloader
-#download pics from thread
-#reqs curl
+#download pics from thread, reqs curl
+#ONLY timer options wurks, needs rewriting of code
 timer=45
+quiet=false
+output_dir=./
+
+
+
 Quittan () {
    printf "\rInterupted, ${#downloaded[*]} pics downloaded in total from $1"
    echo
    exit 0
 }
+
+function Usage()
+{
+      echo "Usage: Scraper-Bash [OPTION] <thread url>"
+      echo "Default OPTIONS: --output ./ --refresh 10"
+      echo "Bash script to scrape 4chan, part of 4chantoolbox."
+      echo ""
+      echo "  -o/--output           set output dir"
+      echo "  -q/--quiet            go silent"
+      echo "  -i/--interval N       thread refresh timer"
+      echo "  -h/--help	            this message"
+      echo ""
+      echo "insert <witty comment> here"
+}
+
+while getopts ":ho:qr" OPTION; do
+    case $OPTION in
+    h)
+        Usage
+        exit 1
+    ;;
+    o)
+        if [ -d $OPTARG ]; then
+            OUTDIR=$OPTARG
+            shift $((OPTIND-1)); OPTIND=1
+        else
+            Usage
+            exit 1
+        fi
+    ;;
+    q)
+        QUIET=True
+        shift $((OPTIND-1)); OPTIND=1
+    ;;
+    r)
+        timer=$OPTARG
+        shift $((OPTIND-1)); OPTIND=1
+    ;;
+    \?)
+        Usage
+        exit 1
+    ;;
+  esac
+done
+
 trap "Quittan $1" INT TERM
 while (true); do
    printf "\rUpdating...          / $last new pics / $total pics total / $1"
    urls=$( curl -s "$1" | egrep -o 'http://(images|img|cgi).4chan.org/[a-z0-9]+/src/[0-9]*\.(jpg|png|gif)' | sed 'n;d;' )
-   [[ -z $urls ]] && printf "\rThread 404 or fail crap, ${#downloaded[*]} pics downloaded in total from $1" && echo && exit 0 
+   [[ -z $urls ]] && printf "\rThread 404 or fail crap, ${#downloaded[*]} pics downloaded in total from $1" && echo && exit 0
    urlist=( $urls )
    index=0
    for u in ${urlist[@]}; do
