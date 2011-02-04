@@ -40,22 +40,22 @@ end
 
 ## Handle flags
 opts = GetoptLong.new(
-	[ '-q', GetoptLong::NO_ARGUMENT ],
-	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
-	[ '--output', '-o', GetoptLong::OPTIONAL_ARGUMENT ],
-	[ '--timer', '-t', GetoptLong::OPTIONAL_ARGUMENT ]
+    [ '-q', GetoptLong::NO_ARGUMENT ],
+    [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
+    [ '--output', '-o', GetoptLong::OPTIONAL_ARGUMENT ],
+    [ '--timer', '-t', GetoptLong::OPTIONAL_ARGUMENT ]
 )
 
 opts.each do |opt, arg|
-	if opt == '-q' then
-		@verbose = False
-	elsif ['-h', '--help'].include? opt then
-		usage()
-	elsif ['-o', '--output'].include? opt then
-		@output = arg
-	elsif ['-t', '--timer'].include? opt then
-		@refresh = arg.to_i
-	end
+    if opt == '-q' then
+        @verbose = False
+    elsif ['-h', '--help'].include? opt then
+        usage()
+    elsif ['-o', '--output'].include? opt then
+        @output = arg
+    elsif ['-t', '--timer'].include? opt then
+        @refresh = arg.to_i
+    end
 end
 
 ##Error check the given path
@@ -79,17 +79,17 @@ loop do
         # Grab the page and split out the image URLS
         html = open(@url);
         v_print("Page " + @url + " downloaded. Processing images.")
-		
-		# Ruby's matchdata stuff doesn't show all occurrences of that pattern, just the first one.
-		# Until I can recall what the correct way to do that is, here's a temporary fix:
+        
+        # Ruby's matchdata stuff doesn't show all occurrences of that pattern, just the first one.
+        # Until I can recall what the correct way to do that is, here's a temporary fix:
         images = []
-		html.read.gsub!(/http:\/\/images\.4chan\.org\/g\/src\/\d+\.(?:png|gif|jpg)/) do |image|
-			images << image
-		end
-		
+        html.read.gsub!(/http:\/\/images\.4chan\.org\/g\/src\/\d+\.(?:png|gif|jpg)/) do |image|
+            images << image
+        end
+        
         images.to_a.each do |image|
             # Split the image name from the URL and get a full path to write to
-			image =~ /src\/(.*$)/
+            image =~ /src\/(.*$)/
             imagename = $1
             fullpath = @output + imagename
 
@@ -99,11 +99,11 @@ loop do
             else
                 v_print("Getting #{image}")
                 File.open(fullpath, 'wb') do |localFile|
-					localFile << open(image).read()
+                    localFile << open(image).read()
                 end
                 downtot += 1
-			end
-		end
+            end
+        end
 
         # Timer
         looptime = (Time.now() - lasttime).to_i;
@@ -112,11 +112,11 @@ loop do
         if looptime < @refresh then
             v_print("Sleeping for #{@refresh - looptime} seconds.")
             sleep(@refresh - looptime)
-		end
+        end
 
     # Handle the keyboard interrupt event
     rescue Interrupt, SystemExit
         puts "\nInterupted. #{downtot} pics downloaded in total from #{@url}."
         exit(0)
-	end
+    end
 end
