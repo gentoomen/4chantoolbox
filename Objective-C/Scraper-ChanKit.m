@@ -43,7 +43,7 @@ int main (int argc, const char * argv[]) {
 		output = [[args stringForKey:@"o"] stringByStandardizingPath];
 	else 
 		// No directory provided, default is cwd
-		output = [[NSFileManager defaultManager] currentDirectoryPath];	
+		output = [filemanager currentDirectoryPath];	
 	NSInteger refresh = 10;
 	if([args objectForKey:@"t"])
 		refresh = [args integerForKey:@"t"];
