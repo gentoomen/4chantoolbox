@@ -1,7 +1,7 @@
 #!/bin/bash
 #4chon image downloader
 #download pics from thread, reqs curl
-#ONLY timer options wurks, needs rewriting of code
+#NEEDS checking but should be cool
 verbose=true
 output="./"
 timer=10
@@ -58,7 +58,7 @@ while getopts ":ho:qr" OPTION; do
             exit 1
         fi
     ;;
-    q)
+    i)
         verbose=false
         shift $((OPTIND-1)); OPTIND=1
     ;;
@@ -88,8 +88,6 @@ Log "Saving to location $output"
 Log "Timer set to every $timer seconds."
 
 while (true); do
-
-   #printf "\rUpdating...          / $last new pics / $total pics total / $1"
 
    urls=$( curl -s "$url" | egrep -o 'http://(images|img|cgi).4chan.org/[a-z0-9]+/src/[0-9]*\.(jpg|png|gif)' | sed 'n;d;' )
    Log "Page $url downloaded. Processing images."
