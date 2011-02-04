@@ -31,10 +31,12 @@ function Usage()
 while getopts ":ho:qr" OPTION; do
     case $OPTION in
     h)
-
+        Usage
+        exit 1
+    ;;
     o)
         if [ -d $OPTARG ]; then
-            OUTDIR=$OPTARG"
+            OUTDIR=$OPTARG
             shift $((OPTIND-1)); OPTIND=1
         else
             Usage
