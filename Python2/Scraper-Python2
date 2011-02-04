@@ -6,15 +6,34 @@
 import os, sys, urllib, re, getopt
 from time import time, sleep
 
+##Functions
+def usage():
+    print "Usage: Scraper-Bash [OPTION] <thread url>"
+    print "Default OPTIONS: --output ./ --refresh 10"
+    print "Bash script to scrape 4chan, part of 4chantoolbox."
+    print ""
+    print " -o/--output set output dir"
+    print " -q/--quiet go silent"
+    print " -i/--interval N thread refresh timer"
+    print " -h/--help this message"
+    print ""
+    print "insert <witty comment> here"
+    sys.exit(' ')
+
 ## Defaults
 verbose = True
 output = ""
 refresh = 10
-url = ""
 
-## Handle arguments
+## Handle URL arg
+if len(sys.argv) == 1:
+    usage()
+else:
+    url = sys.argv[len(sys.argv) - 1]
+
+## Handle flags
 try:                                
-    opts, args = getopt.getopt(sys.argv, "hqo:r:", ["help", "quiet", "output", "refresh"])
+    opts, args = getopt.gnu_getopt(sys.argv, "hqo:t:", ["help", "quiet", "output", "timer"])
 except getopt.GetoptError:
     print str(err)
     usage()
@@ -27,10 +46,12 @@ for o, a in opts:
         sys.exit()
     elif o in ("-o", "--output"):
         output = a
-    elif o in ("-r", "--refresh"):
+    elif o in ("-t", "--timer"):
         refresh = a
     else:
         assert False, "Unhandled Option"
+
+print output
 
 ## Main loop
 while 1:
@@ -43,27 +64,19 @@ while 1:
     for image in images:
         imagename = re.search('src/(.*$)', image)
         imagename = imagename.group(1)
+        fullpath = output + imagename
 
-        if os.path.exists(imagename):
-            print "File \'%s' exists. Skipping." % imagename
+        if os.path.exists(fullpath):
+            print "File \'%s' exists. Skipping." % fullpath
         else:
             print "Getting %s" % image
             u = urllib.urlopen(image)
-            localFile = open(imagename, 'w')
+            localFile = open(fullpath, 'w')
             localFile.write(u.read())
             localFile.close()
 
     looptime = time() - lasttime;
     lasttime = time();
-    if looptime < 10:
+    if looptime < refresh:
         print "Finished early. Sleeping for %d seconds." % (10 - looptime)
         sleep (10 - looptime)
-
-
-def usage():
-    print ' -------------------------------------------------------------------------'
-    print ' Created by the /g/entoomen for the purpose of shared learning and just   '
-    print ' plain having some handy tools. Released under the GPLv3.                 '
-    print ' '
-    print ' -------------------------------------------------------------------------'
-    sys.exit(' ')
