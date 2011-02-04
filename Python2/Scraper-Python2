@@ -6,26 +6,30 @@
 import os, sys, urllib, re, getopt
 from time import time, sleep
 
-##Functions
-def usage():
-    print "=================================================="
-    print "Usage: Scraper-Bash [OPTION] <thread url>"
-    print "Default OPTIONS: --output ./ --refresh 10"
-    print "Bash script to scrape 4chan, part of 4chantoolbox."
-    print ""
-    print " -o/--output set output dir"
-    print " -q/--quiet go silent"
-    print " -i/--interval N thread refresh timer"
-    print " -h/--help this message"
-    print ""
-    print "insert <witty comment> here"
-    print "=================================================="
-    sys.exit(' ')
-
 ## Defaults
 verbose = True
 output = "./"
 refresh = 10
+
+##Functions
+def v_print(instr):
+    if verbose:
+        print instr
+
+def usage():
+    v_print("==================================================")
+    v_print("Usage: Scraper-Bash [OPTION] <thread url>")
+    v_print("Default OPTIONS: --output ./ --refresh 10")
+    v_print("Bash script to scrape 4chan, part of 4chantoolbox.")
+    v_print("")
+    v_print(" -o/--output set output dir")
+    v_print(" -q/--quiet go silent")
+    v_print(" -t/--timer N thread refresh timer")
+    v_print(" -h/--help this message")
+    v_print("")
+    v_print("insert <witty comment> here")
+    v_print("==================================================")
+    sys.exit(' ')
 
 ## Handle URL arg
 if len(sys.argv) == 1:
@@ -37,7 +41,7 @@ else:
 try:                                
     opts, args = getopt.gnu_getopt(sys.argv, "hqo:t:", ["help", "quiet", "output", "timer"])
 except getopt.GetoptError:
-    print str(err)
+    v_print (str(err))
     usage()
 
 for o, a in opts:
@@ -53,16 +57,16 @@ for o, a in opts:
         assert False, "Unhandled Option"
 
 ##Report which options we're using
-print "Downloading " + url
-print "Saving to location " + output
-print "Timer set to every " + str(refresh) + " seconds."
+v_print("Downloading " + url)
+v_print("Saving to location " + output)
+v_print("Timer set to every " + str(refresh) + " seconds.")
 
 ## Main loop
 while 1:
     lasttime = time()
 
     html = urllib.urlopen(url);
-    print "Page %s downloaded. Processing images." % url
+    v_print("Page " + url + " downloaded. Processing images.")
     images = re.findall('http://images.4chan.org/g/src/\d{13}.(?:png|gif|jpg)', html.read())
 
     for image in images:
@@ -71,9 +75,9 @@ while 1:
         fullpath = output + imagename
 
         if os.path.exists(fullpath):
-            print "File \'%s' exists. Skipping." % fullpath
+            v_print("File \'" + fullpath + "' exists. Skipping.")
         else:
-            print "Getting %s" % image
+            v_print("Getting " + image)
             u = urllib.urlopen(image)
             localFile = open(fullpath, 'w')
             localFile.write(u.read())
@@ -81,7 +85,7 @@ while 1:
 
     looptime = int(time() - lasttime);
     lasttime = time();
-    print "Finished in %d seconds." % looptime
+    v_print("Finished in " + str(looptime) + " seconds.")
     if looptime < refresh:
-        print "Sleeping for %d seconds." % (refresh - looptime)
+        v_print("Sleeping for " + str(refresh - looptime) + " seconds.")
         sleep (refresh - looptime)
