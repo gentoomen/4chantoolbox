@@ -8,11 +8,14 @@ One important difference to take note of in this approach vs the other languages
 Within the Objective-C subproject are two different classes of implementation: **Application-ObjC** and **Application-ChanKit**.
 
 ObjC are strict Objective-C applications which link only against the Foundation framework and will build out of the box, possibly even on GNUStep without modification. They can be built in the following way using GCC or clang:
+
  `$CC -framework Foundation -o application [source files]`
 - - -
 ChanKit applications, rather, act as basic frontends to the ChanKit framework available here: [command-Q/ChanKit](http://github.com/command-Q/ChanKit)
+
 A more complex command-line test interface demoing the full capabilities of the framework is available with the project.
 The build command for a ChanKit application is:
+
 `$CC -framework Cocoa -framework ChanKit -o application [source files]`
 
 Or if ChanKit.framework is not in your framework search path, explicitly specify the path with `-F $basepath`.
