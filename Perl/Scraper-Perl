@@ -4,6 +4,7 @@
 ## If something goes wrong, it's your fault so eat shit.
 
 use LWP::Simple;
+use strict;
 
 while () {
     my $lasttime = time();
@@ -12,7 +13,7 @@ while () {
     print "Page $ARGV[0] downloaded. Processing images.\n";
     my @images = ($URL =~ m/http:\/\/images.4chan.org\/[a-zA-Z]\/src\/[0-9]{13}\.(?:jpg|png|gif|jpeg)/ig);
 
-    for $image (@images) {
+    for my $image (@images) {
 
         my $imagename = $image;
         $imagename =~ s/^.*\///;
