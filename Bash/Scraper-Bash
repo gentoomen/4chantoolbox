@@ -22,8 +22,8 @@ function Usage()
       echo ""
       echo "  -o/--output           set output dir"
       echo "  -q/--quiet            go silent"
-      echo "  -i/--interval N       thread refresh timer
-      echo "  -h/--help	            this message
+      echo "  -i/--interval N       thread refresh timer"
+      echo "  -h/--help	            this message"
       echo ""
       echo "insert <witty comment> here"
 }
