@@ -54,6 +54,7 @@ int main (int argc, const char * argv[]) {
 
 	// This ChanKit method will prepare a thread for downloading from a given URL, but not actually hit the network until populate is called. We rely on this separation to simplify the loop.
 	CKThread* thread = [CKThread threadReferencingURL:url];
+	if(thread)	NSLog(@"Fetching thread #%d.",thread.ID);
 	NSUInteger lastindex = 0; // Don't bother with images that have already been processed
 	int status;	// This will keep track of the thread's status; if it 404s, we go offline, or any other error occurs it will abort the loop
 	NSUInteger downtot = 0;
@@ -63,10 +64,6 @@ int main (int argc, const char * argv[]) {
 		NSDate* lasttime = [NSDate date];		
 		// Download and parse the thread
 		status = [thread populate];
-		if(status == CK_ERR_SUCCESS)
-			NSLog(@"Thread #%@ successfully fetched.",thread.IDString);
-		else
-			NSLog(@"Failed to fetch %@, error code: %d",thread.URL,status);
 		// Sure would be nice to have a subarrayFromIndex: method. If we weren't watching the thread we could simply use:
 		//		for(CKImage* image in thread.images)
 		for(CKImage* image in [thread.images subarrayWithRange:NSMakeRange(lastindex,thread.imagecount-lastindex)]) {
@@ -83,7 +80,7 @@ int main (int argc, const char * argv[]) {
 				}
 				else NSLog(@"Error writing %@",fullpath);
 			}
-			else NSLog(@"Failed to fetch %@, error code: %d",image.URL,imagestatus);
+			else NSLog(@"Failed to fetch %@, error: %@",image.URL,[CKUtil describeError:imagestatus]);
 		}
 		lastindex = thread.imagecount;
 		NSTimeInterval looptime = [[NSDate date] timeIntervalSinceDate:lasttime];
@@ -95,6 +92,7 @@ int main (int argc, const char * argv[]) {
 			[NSThread sleepForTimeInterval:looptime];
 		}
 	} while(refresh && status == CK_ERR_SUCCESS);
+	NSLog(@"%@: Scrape aborted: %@",thread.URL,[CKUtil describeError:status]);
 	
 	if(downtot) {
 		// Welcome to date handling in Cocoa
