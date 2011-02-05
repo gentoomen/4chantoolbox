@@ -71,14 +71,19 @@ int main (int argc, const char * argv[]) {
 		//		for(CKImage* image in thread.images)
 		for(CKImage* image in [thread.images subarrayWithRange:NSMakeRange(lastindex,thread.imagecount-lastindex)]) {
 			NSString* fullpath = [output stringByAppendingPathComponent:image.name];
+			int imagestatus;
 			if([filemanager fileExistsAtPath:fullpath])
 				NSLog(@"%@ exists, skipping.",fullpath);
-			// We use some of the extra metadata provided by Yotsuba to write the original filename as well as tag the modification date as the time it was uploaded to the server
-			else if([filemanager createFileAtPath:fullpath contents:image.data attributes:[NSDictionary dictionaryWithObject:image.timestamp forKey:@"NSFileModificationDate"]]) {
-				NSLog(@"%@ saved to %@",image.URL,fullpath);
-				downtot++;
+			// Check to make sure the image is reachable i.e. hasn't been deleted, we haven't gone offline, or thread didn't 404 since line 65
+			else if((imagestatus = [image load]) == CK_ERR_SUCCESS) {
+				// We use some of the extra metadata provided by Yotsuba to write the original filename as well as tag the modification date as the time it was uploaded to the server
+				if([filemanager createFileAtPath:fullpath contents:image.data attributes:[NSDictionary dictionaryWithObject:image.timestamp forKey:@"NSFileModificationDate"]]) {
+					NSLog(@"%@ saved to %@",image.URL,fullpath);
+					downtot++;
+				}
+				else NSLog(@"Error writing %@",fullpath);
 			}
-			else NSLog(@"Error writing %@",fullpath);
+			else NSLog(@"Failed to fetch %@, error code: %d",image.URL,imagestatus);
 		}
 		lastindex = thread.imagecount;
 		NSTimeInterval looptime = [[NSDate date] timeIntervalSinceDate:lasttime];
