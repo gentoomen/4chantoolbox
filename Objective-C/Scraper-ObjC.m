@@ -68,7 +68,7 @@ int main (int argc, const char * argv[]) {
 		// This XPath will get us all of the post image URLs, here's the breakdown:
 		//	/html/body/form 	The entire thread is below this node
 		//	             //		Abitrary depth selector. For efficiency it's best to avoid this and use full paths where possible, however in this case
-		//					 		OP nodes are directly under /html/body/form, while replies are within /html/body/form/table/tr/td[@class="reply"]
+		//				 OP nodes are directly under /html/body/form, while replies are within /html/body/form/table/tr/td[@class="reply"]
 		//	  a[img[@md5]]/ 	Selects all <a> that contain <img> tags, and furthermore only where the imgs have md5 attributes (otherwise we get a JList ad too)
 		//	          @href		The final content that will be selected will be the string content of the image link's href attribute 
 		NSArray* images = [thread nodesForXPath:@"/html/body/form//a[img[@md5]]/@href" error:NULL];
