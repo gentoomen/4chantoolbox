@@ -22,12 +22,12 @@ int main (int argc, const char * argv[]) {
 	// However in our case we can't do anything without -u being set anyway, so we should just bail out if that isn't present.
 	if(![args objectForKey:@"u"]) {
 	    NSLog( @"\nObjective-C sample application to scrape 4chan, part of 4chantoolbox.\n"
-	    		"\n"
+				"\n"
 				"OPTIONS\n"
-	    		" -u <url>\t url to download\n"
-	    		" -o <path>\t output dir [./]\n"
-	    		" -t <int>\t thread refresh in seconds [10]\n"
-	    		"\n");	
+				" -u <url>\t url to download\n"
+				" -o <path>\t output dir [./]\n"
+				" -t <int>\t thread refresh in seconds [10]\n"
+				"\n");	
 		[pool drain];
 		return 0;
 	}
