@@ -144,7 +144,5 @@ for i in range(len(filestats)):
                     os.remove(checkagainst.wholepath)
                     print checkagainst.wholepath + " deleted."
 
-                break
-
             else:
                 print "No md5 match."
