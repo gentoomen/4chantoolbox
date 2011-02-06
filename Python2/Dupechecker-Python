@@ -31,6 +31,15 @@ def add_dir(dirpath):
         elif os.path.isfile(dirpath + tempfile):
             filestats.append( fileblock( dirpath + tempfile ) )
 
+# get user input to determine if it's deleteion time or not
+def get_choice():
+    choose = ""
+    validOptions = ( 'y', 'n', 'o', 'yes', 'no', 'other')
+    while not choose in validOptions :
+        choose = raw_input('(y)es / (n)o / the (o)ther file ? ')
+    return choose
+    
+
 def md5_for_file(filename, block_size=2**20):
     f = open(filename)
     md5 = hashlib.md5()
@@ -93,13 +102,21 @@ add_dir(directory)
 for i in range(len(filestats)):
     startfile = filestats[i]
 
+    # be careful to check we haven't deleted either the file in a previous action
+    if not os.path.isfile(startfile):
+        break
+
     for e in range(i + 1, len(filestats)):
         checkagainst = filestats[e]
+
+        # be careful to check we haven't deleted either the file in a previous action
+        if not os.path.isfile(checkagainst):
+            break
 
         if startfile.size == checkagainst.size:
 
             print "========================================="
-            print "File: " + startfile.wholepath
+            print "File:    " + startfile.wholepath
             print "Matches: " + checkagainst.wholepath
             print "Size: " + str(startfile.size)
 
@@ -116,16 +133,15 @@ for i in range(len(filestats)):
                 if not ask:
                     choice = "y"
                 else:
-                    choice = ""
-
-                # get user input to determine if it's deleteion time or not
-                while not choice == 'y' and not choice == 'n':
-                    choice = raw_input('y/n? ')
+                    choice = get_choice()
 
                 # In instructed to, delete the file    
-                if choice == 'y':
+                if choice in ('y', 'yes'):
                     os.remove(startfile.wholepath)
                     print startfile.wholepath + " deleted."
+                elif choice in ('o', 'other'):
+                    os.remove(checkagainst.wholepath)
+                    print checkagainst.wholepath + " deleted."
 
                 break
 
