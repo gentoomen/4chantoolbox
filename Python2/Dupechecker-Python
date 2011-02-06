@@ -17,7 +17,7 @@ filestats   = []
 class fileblock():
     def __init__(self, inpath):
         self.wholepath = inpath
-        self.size = pretty_size( os.path.getsize(inpath) )
+        self.size = os.path.getsize(inpath)
         self.md5 = ""
 
     def get_md5(self):
@@ -64,13 +64,13 @@ def remfile(infile):
     print infile.wholepath + " deleted."
 
 def showmatch(filea, fileb):
-    print "========================================="
+    print "=========================== Size Match ==========================="
     print "File:    " + filea.wholepath
     print "Matches: " + fileb.wholepath
-    print "Size:    " + filea.size
+    print "Size:    " + pretty_size( filea.size )
 
 def usage():
-    print "================================================================="
+    print "=================================================================="
     print "Usage: Dupechecker-Python [OPTION] <directory>"
     print "Script to remove duplicate files"
     print " "
@@ -78,7 +78,7 @@ def usage():
     print " -r/--recursive    Recurse through directories"
     print " -y/--yes-to-all   Remove duplicates without prompting"
     print " -h/--help         This help text"
-    print "================================================================="
+    print "=================================================================="
     sys.exit(' ')
 
 ## Rip out any genuine paths in the args
