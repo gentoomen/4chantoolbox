@@ -16,7 +16,7 @@ filestats = []
 class fileblock():
     def __init__(self, inpath):
         self.wholepath = inpath
-        self.size = os.path.getsize(inpath)
+        self.size = pretty_size( os.path.getsize(inpath) )
         self.md5 = ""
 
     def get_md5(self):
@@ -40,6 +40,15 @@ def md5_for_file(filename, block_size=2**20):
             break
         md5.update(data)
     return md5.digest()
+
+def pretty_size(size):
+    suffixes = [("B",2**10), ("K",2**20), ("M",2**30), ("G",2**40), ("T",2**50)]
+    for suf, lim in suffixes:
+        if size > lim:
+            continue
+        else:
+            return round(size/float(lim/2**10),2).__str__()+suf
+
 
 def usage():
     print "======================================================"
