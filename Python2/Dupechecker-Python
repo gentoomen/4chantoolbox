@@ -10,6 +10,14 @@ recursive   = False       #defaults to not recursive
 directory   = "./"        #default is current dir
 ask         = True        #defaults to requiring confirmation
 
+def add_dir(dirpath):
+    print "Scanning directory " + dirpath
+    for tempfile in os.listdir(dirpath):
+        if os.path.isdir(dirpath + tempfile) and recursive:
+            add_dir(dirpath + tempfile)
+        elif os.path.isfile(dirpath + tempfile):
+            filestats.append( fileblock( dirpath + tempfile ) )
+
 def md5_for_file(filename, block_size=2**20):
     f = open(filename)
     md5 = hashlib.md5()
@@ -59,10 +67,9 @@ if os.path.isdir(directory) == False:
 filestats = []
 
 #Get a list of files only (no dirs)
-for tempfile in os.listdir(directory):
-    if os.path.isfile(directory + tempfile):
-        filestats.append( fileblock( directory + tempfile ) )
+add_dir(directory)
 
+# The real meat of it -- compare listed files.
 for i in range(len(filestats)):
     startfile = filestats[i]
 
