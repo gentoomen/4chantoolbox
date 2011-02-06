@@ -103,14 +103,14 @@ for i in range(len(filestats)):
     startfile = filestats[i]
 
     # be careful to check we haven't deleted either the file in a previous action
-    if not os.path.isfile(startfile):
+    if not os.path.isfile(startfile.wholepath):
         break
 
     for e in range(i + 1, len(filestats)):
         checkagainst = filestats[e]
 
         # be careful to check we haven't deleted either the file in a previous action
-        if not os.path.isfile(checkagainst):
+        if not os.path.isfile(checkagainst.wholepath):
             break
 
         if startfile.size == checkagainst.size:
