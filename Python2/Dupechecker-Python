@@ -94,6 +94,10 @@ for o, a in opts:
 if directory == "./":
     print "No valid directory given. Using current directory."
 
+# If the dir doesn't end with a "/" we need to add one
+if not directory[ len(directory) - 1 ] == "/":
+    directory = directory + "/"
+
 ## Main part
 #Get a list of files only (no dirs)
 add_dir(directory)
@@ -101,20 +105,17 @@ add_dir(directory)
 # The real meat of it -- compare listed files.
 for i in range(len(filestats)):
     startfile = filestats[i]
-
     # be careful to check we haven't deleted either the file in a previous action
     if not os.path.isfile(startfile.wholepath):
         break
 
     for e in range(i + 1, len(filestats)):
         checkagainst = filestats[e]
-
         # be careful to check we haven't deleted either the file in a previous action
         if not os.path.isfile(checkagainst.wholepath):
             break
 
         if startfile.size == checkagainst.size:
-
             print "========================================="
             print "File:    " + startfile.wholepath
             print "Matches: " + checkagainst.wholepath
