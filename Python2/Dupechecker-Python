@@ -122,10 +122,9 @@ for i in range(len(filestats)):
             print "Size:    " + startfile.size
 
             # Generate md5s if necessary
-            if startfile.md5 == "":
-                startfile.get_md5()
-            if checkagainst.md5 == "":
-                checkagainst.get_md5()
+            for f in (startfile, checkagainst):
+                if f.md5 == "":
+                    f.get_md5()
 
             if startfile.md5 == checkagainst.md5:
                 print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
