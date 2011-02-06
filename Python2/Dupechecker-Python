@@ -9,6 +9,7 @@ import sys, getopt, os, hashlib
 recursive   = False       #defaults to not recursive
 directory   = "./"        #default is current dir
 ask         = True        #defaults to requiring confirmation
+dummy       = False
 
 # All important list of files
 filestats   = []
@@ -34,7 +35,7 @@ def add_dir(dirpath):
 # get user input to determine if it's deleteion time or not
 def get_choice():
     choose = ""
-    validOptions = ( 'y', 'n', 'o' 'b', 'yes', 'no', 'other', 'both')
+    validOptions = ( 'y', 'n', 'o', 'b', 'yes', 'no', 'other', 'both')
     while not choose in validOptions :
         choose = raw_input('(y)es / (n)o / the (o)ther file / (b)oth ? ')
     return choose
@@ -69,14 +70,15 @@ def showmatch(filea, fileb):
     print "Size:    " + filea.size
 
 def usage():
-    print "======================================================"
+    print "================================================================="
     print "Usage: Dupechecker-Python [OPTION] <directory>"
     print "Script to remove duplicate files"
     print " "
-    print " -r/--recursive    recurse through directories"
-    print " -y/--yes-to-all   remove duplicates without prompting"
-    print " -h/--help         this help text"
-    print "======================================================"
+    print " -d/--dummy        No deletion. Output findings without prompting"
+    print " -r/--recursive    Recurse through directories"
+    print " -y/--yes-to-all   Remove duplicates without prompting"
+    print " -h/--help         This help text"
+    print "================================================================="
     sys.exit(' ')
 
 ## Rip out any genuine paths in the args
@@ -86,14 +88,16 @@ for arg in sys.argv:
 
 ## Handle Args
 try:
-    opts, args = getopt.gnu_getopt( sys.argv, "hry", ["help", "recursive", "yes-to-all"] )
+    opts, args = getopt.gnu_getopt( sys.argv, "dhry", ["dummy", "help", "recursive", "yes-to-all"] )
 
 except getopt.GetoptError:
     print str(err)
     usage()
 
 for o, a in opts:
-    if o in ("-r", "--recursive"):
+    if o in ("-d", "--dummy"):
+        dummy = True
+    elif o in ("-r", "--recursive"):
         recursive = True
     elif o in ("-y", "--yes-to-all"):
         ask = False
@@ -134,22 +138,26 @@ try:
                 for f in (startfile, checkagainst):
                     if f.md5 == "":
                         f.get_md5()
-
-                if startfile.md5 == checkagainst.md5:
-                    print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
-    
-                    # Allowance for the automatic overwrite flag
-                    if ask:
-                        choice = get_choice()
-
-                    # In instructed to, delete the file    
-                    if choice in ('y', 'yes', 'b', 'both') or not ask:
-                        remfile(startfile)
-                    if choice in ('o', 'other', 'b', 'both'):
-                        remfile(checkagainst)
+                
+                if dummy:
+                    print "=== Full md5 match found ==="
 
                 else:
-                    print "No md5 match."
+                    if startfile.md5 == checkagainst.md5:
+                        print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
+    
+                        # Allowance for the automatic overwrite flag
+                        if ask:
+                            choice = get_choice()
+
+                        # In instructed to, delete the file    
+                        if choice in ('y', 'yes', 'b', 'both') or not ask:
+                            remfile(startfile)
+                        if choice in ('o', 'other', 'b', 'both'):
+                            remfile(checkagainst)
+
+                    else:
+                        print "No md5 match."
 except (KeyboardInterrupt, SystemExit):
     print "\nInterrupted. Exciting cleanly."
     sys.exit(' ')
