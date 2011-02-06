@@ -76,4 +76,11 @@ for startfile in range(len(filestats)):
                 filestats[checkagainst].get_md5()
 
             if filestats[startfile].md5 == filestats[checkagainst].md5:
-                print "Match found!"
+                print "Match found! Would you like to delete duplicate file " + filestats[startfile].wholepath + ""
+                choice = ""
+                while not choice == 'y' and not choice == 'n':
+                    choice = raw_input('y/n? ')
+                if choice == 'y':
+                    os.remove(filestats[startfile].wholepath)
+                break
+
