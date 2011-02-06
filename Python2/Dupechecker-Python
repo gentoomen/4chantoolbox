@@ -58,6 +58,16 @@ def pretty_size(size):
         else:
             return round(size/float(lim/2**10),2).__str__()+suf
 
+def remfile(infiile):
+    os.remove(infile.wholepath)
+    print infile.wholepath + " deleted."
+
+def showmatch(filea, fileb):
+    print "========================================="
+    print "File:    " + filea.wholepath
+    print "Matches: " + fileb.wholepath
+    print "Size:    " + filea.size
+
 def usage():
     print "======================================================"
     print "Usage: Dupechecker-Python [OPTION] <directory>"
@@ -116,10 +126,7 @@ for i in range(len(filestats)):
             break
 
         if startfile.size == checkagainst.size:
-            print "========================================="
-            print "File:    " + startfile.wholepath
-            print "Matches: " + checkagainst.wholepath
-            print "Size:    " + startfile.size
+            showmatch(startfile, checkagainst)
 
             # Generate md5s if necessary
             for f in (startfile, checkagainst):
@@ -130,18 +137,14 @@ for i in range(len(filestats)):
                 print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
     
                 # Allowance for the automatic overwrite flag
-                if not ask:
-                    choice = "y"
-                else:
+                if ask:
                     choice = get_choice()
 
                 # In instructed to, delete the file    
-                if choice in ('y', 'yes'):
-                    os.remove(startfile.wholepath)
-                    print startfile.wholepath + " deleted."
+                if choice in ('y', 'yes') or not ask:
+                    remfile(startfile)
                 elif choice in ('o', 'other'):
-                    os.remove(checkagainst.wholepath)
-                    print checkagainst.wholepath + " deleted."
+                    remfile(checkagainst)
 
             else:
                 print "No md5 match."
