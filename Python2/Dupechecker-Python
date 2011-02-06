@@ -1,4 +1,4 @@
-#!/bin/python2.7
+#!/usr/bin/python2.7
 # dupechecker
 # Finds duplicate files based on md5
 # and filesize
@@ -49,14 +49,20 @@ ask         = True        #defaults to requiring confirmation
 #   esac
 # done
 
-if len( sys.argv ) == 1:
+
+try:
+    opts, args = getopt.gnu_getopt( sys.argv, "ry", ["recursive", "yes-to-all"] )
+
+except getopt.GetoptError:
+    print str(err)
     usage()
-else:
-    directory = sys.argv[len(sys.argv) - 1]
 
-for arg in sys.argv:
-    dir = arg
-
+for o, a in opts:
+    if o in ("-r", "--recursive"):
+        recursive = True
+    elif o in ("-y", "--yes-to-all"):
+        ask = False
+    else:
 
 ##MAIN
 if [[ ! -z $@ ]] && [[ -d $1 ]]; then
