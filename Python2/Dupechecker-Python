@@ -34,9 +34,9 @@ def add_dir(dirpath):
 # get user input to determine if it's deleteion time or not
 def get_choice():
     choose = ""
-    validOptions = ( 'y', 'n', 'o', 'yes', 'no', 'other')
+    validOptions = ( 'y', 'n', 'o' 'b', 'yes', 'no', 'other', 'both')
     while not choose in validOptions :
-        choose = raw_input('(y)es / (n)o / the (o)ther file ? ')
+        choose = raw_input('(y)es / (n)o / the (o)ther file / (b)oth ? ')
     return choose
     
 
@@ -58,7 +58,7 @@ def pretty_size(size):
         else:
             return round(size/float(lim/2**10),2).__str__()+suf
 
-def remfile(infiile):
+def remfile(infile):
     os.remove(infile.wholepath)
     print infile.wholepath + " deleted."
 
@@ -143,9 +143,9 @@ try:
                         choice = get_choice()
 
                     # In instructed to, delete the file    
-                    if choice in ('y', 'yes') or not ask:
+                    if choice in ('y', 'yes', 'b', 'both') or not ask:
                         remfile(startfile)
-                    elif choice in ('o', 'other'):
+                    if choice in ('o', 'other', 'b', 'both'):
                         remfile(checkagainst)
 
                 else:
