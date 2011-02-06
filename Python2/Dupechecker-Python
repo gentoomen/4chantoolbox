@@ -13,11 +13,21 @@ ask         = True        #defaults to requiring confirmation
 # All important list of files
 filestats = []
 
+class fileblock():
+    def __init__(self, inpath):
+        self.wholepath = inpath
+        self.size = os.path.getsize(inpath)
+        self.md5 = ""
+
+    def get_md5(self):
+        print "Generating md5 for " + self.wholepath
+        self.md5 = md5_for_file(self.wholepath)
+
 def add_dir(dirpath):
     print "Scanning directory " + dirpath
     for tempfile in os.listdir(dirpath):
-        if os.path.isdir(dirpath + tempfile):
-            add_dir(dirpath + tempfile)
+        if os.path.isdir(dirpath + tempfile + "/") and recursive:
+            add_dir(dirpath + tempfile + "/")
         elif os.path.isfile(dirpath + tempfile):
             filestats.append( fileblock( dirpath + tempfile ) )
 
@@ -30,16 +40,6 @@ def md5_for_file(filename, block_size=2**20):
             break
         md5.update(data)
     return md5.digest()
-
-class fileblock():
-    def __init__(self, inpath):
-        self.wholepath = inpath
-        self.size = os.path.getsize(inpath)
-        self.md5 = ""
-
-    def get_md5(self):
-        print "Generating md5 for " + self.wholepath
-        self.md5 = md5_for_file(self.wholepath)
 
 ## Rip out any genuine paths in the args
 for arg in sys.argv:
