@@ -42,7 +42,8 @@ else:
 
 ## Handle flags
 try:                                
-    opts, args = getopt.gnu_getopt(sys.argv, "hqo:t:", ["help", "quiet", "output", "timer"])
+    opts, args = getopt.gnu_getopt(  sys.argv, "hqo:t:", \
+                                       ["help", "quiet", "output", "timer"])
 except getopt.GetoptError:
     v_print (str(err))
     usage()
