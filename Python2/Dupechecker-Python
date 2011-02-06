@@ -26,6 +26,9 @@ class fileblock():
         self.size = os.path.getsize(inpath)
         self.md5 = ""
 
+    def get_md5(self):
+        print "Generating md5 for " + self.wholepath
+        self.md5 = md5_for_file(self.wholepath)
 
 ## Rip out any genuine paths in the args
 for arg in sys.argv:
@@ -51,17 +54,26 @@ if os.path.isdir(directory) == False:
     print "Error! " + directory + " is not a valid directory! Exiting."
     sys.exit(' ')
 
-## Lists used for the hash checking
+## Main part
+# Lists used for the hash checking
 filestats = []
 
-##MAIN
 #Get a list of files only (no dirs)
 for tempfile in os.listdir(directory):
     if os.path.isfile(directory + tempfile):
         filestats.append( fileblock( directory + tempfile ) )
 
+for startfile in range(len(filestats)):
+    for checkagainst in range(startfile + 1, len(filestats)):
+        if filestats[startfile].size == filestats[checkagainst].size:
 
-for tempfile in filestats:
-    print "File: " + tempfile.wholepath
-    print "Size: " + str(tempfile.size)
+            print "File: " + filestats[startfile].wholepath + " is the same size as " + filestats[checkagainst].wholepath
+            print "Size: " + str(filestats[startfile].size)
 
+            if filestats[startfile].md5 == "":
+                filestats[startfile].get_md5()
+            if filestats[checkagainst].md5 == "":
+                filestats[checkagainst].get_md5()
+
+            if filestats[startfile].md5 == filestats[checkagainst].md5:
+                print "Match found!"
