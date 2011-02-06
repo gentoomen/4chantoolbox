@@ -65,13 +65,16 @@ for tempfile in os.listdir(directory):
 
 for i in range(len(filestats)):
     startfile = filestats[i]
+
     for e in range(i + 1, len(filestats)):
         checkagainst = filestats[e]
+
         if startfile.size == checkagainst.size:
 
             print "File: " + startfile.wholepath + " is the same size as " + checkagainst.wholepath
             print "Size: " + str(startfile.size)
 
+            # Generate md5s if necessary
             if startfile.md5 == "":
                 startfile.get_md5()
             if checkagainst.md5 == "":
@@ -79,10 +82,20 @@ for i in range(len(filestats)):
 
             if startfile.md5 == checkagainst.md5:
                 print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
-                choice = ""
+    
+                # Allowance for the automatic overwrite flag
+                if not ask:
+                    choice = "y"
+                else:
+                    choice = ""
+
+                # get user input to determine if it's deleteion time or not
                 while not choice == 'y' and not choice == 'n':
                     choice = raw_input('y/n? ')
+
+                # In instructed to, delete the file    
                 if choice == 'y':
                     os.remove(startfile.wholepath)
-                break
+                    print startfile.wholepath + " deleted."
 
+                break
