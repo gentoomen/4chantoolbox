@@ -63,24 +63,26 @@ for tempfile in os.listdir(directory):
     if os.path.isfile(directory + tempfile):
         filestats.append( fileblock( directory + tempfile ) )
 
-for startfile in range(len(filestats)):
-    for checkagainst in range(startfile + 1, len(filestats)):
-        if filestats[startfile].size == filestats[checkagainst].size:
+for i in range(len(filestats)):
+    startfile = filestats[i]
+    for e in range(i + 1, len(filestats)):
+        checkagainst = filestats[e]
+        if startfile.size == checkagainst.size:
 
-            print "File: " + filestats[startfile].wholepath + " is the same size as " + filestats[checkagainst].wholepath
-            print "Size: " + str(filestats[startfile].size)
+            print "File: " + startfile.wholepath + " is the same size as " + checkagainst.wholepath
+            print "Size: " + str(startfile.size)
 
-            if filestats[startfile].md5 == "":
-                filestats[startfile].get_md5()
-            if filestats[checkagainst].md5 == "":
-                filestats[checkagainst].get_md5()
+            if startfile.md5 == "":
+                startfile.get_md5()
+            if checkagainst.md5 == "":
+                checkagainst.get_md5()
 
-            if filestats[startfile].md5 == filestats[checkagainst].md5:
-                print "Match found! Would you like to delete duplicate file " + filestats[startfile].wholepath + ""
+            if startfile.md5 == checkagainst.md5:
+                print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
                 choice = ""
                 while not choice == 'y' and not choice == 'n':
                     choice = raw_input('y/n? ')
                 if choice == 'y':
-                    os.remove(filestats[startfile].wholepath)
+                    os.remove(startfile.wholepath)
                 break
 
