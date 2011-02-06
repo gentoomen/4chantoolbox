@@ -1,0 +1,84 @@
+#!/bin/python2.7
+# dupechecker
+# Finds duplicate files based on md5
+# and filesize
+
+import sys, getopt
+
+
+## CONSTANTS
+recursive   = False       #defaults to not recursive
+directory   = "./"        #default is current dir
+ask         = True        #defaults to requiring confirmation
+
+##FUNCTIONS
+# def getlist() {
+#   z=$#
+#   for ((n=1;n<=$z;n++)); do
+#     args="$args -name \"$1\""
+#     if [[ 1 < $# ]]; then 
+#       args="$args -o"
+#     fi
+#     shift 1
+#   done
+#   eval find $directory $recursive -type f "$args"
+# }
+# 
+# function Hash_check() {
+#   file_hash=$(md5sum $1)
+#   for hash in "${hash_array[@]}"; do
+#     if [[ ${hash%  *} = ${file_hash%  *} ]]; then
+#       return 0
+#     fi
+#   done
+#   hash_array[${#hash_array[@]}]="$file_hash" # hash_array+=("$file_hash") reqs. bash >= Bash 3.1
+#   return 1
+# }
+# 
+# while getopts ":r" OPTION; do
+#   case $OPTION in  
+#     r) 
+#       recursive=""
+#       shift $((OPTIND-1)); OPTIND=1  # shift $((OPTIND-1)); == shift 1 , just for coherence...
+#     ;;
+#     \?)
+#       echo "./dupechecker [options] PATH \"FILES1\" \"FILES2\""
+#       echo "Put FILES* expressions in quotes plox, yes globbing works.. uhmm should"
+#       exit 1	
+#     ;;
+#   esac
+# done
+
+if len( sys.argv ) == 1:
+    usage()
+else:
+    directory = sys.argv[len(sys.argv) - 1]
+
+for arg in sys.argv:
+    dir = arg
+
+
+##MAIN
+if [[ ! -z $@ ]] && [[ -d $1 ]]; then
+  directory=$1
+  shift 1
+fi
+
+old_IFS="$IFS"
+IFS='\
+'
+for file in $(Get_list "$@"); do
+  if Hash_check $file; then
+    echo "$file COLLISION $hash"
+    echo "collision $file" #rm $file
+  else
+    echo $file 
+  fi
+done
+IFS="$old_IFS"
+
+
+
+
+
+
