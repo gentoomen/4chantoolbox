@@ -3,53 +3,36 @@
 # Finds duplicate files based on md5
 # and filesize
 
-import sys, getopt
+import sys, getopt, os, hashlib
 
-
-## CONSTANTS
+## Defaults
 recursive   = False       #defaults to not recursive
 directory   = "./"        #default is current dir
 ask         = True        #defaults to requiring confirmation
 
-##FUNCTIONS
-# def getlist() {
-#   z=$#
-#   for ((n=1;n<=$z;n++)); do
-#     args="$args -name \"$1\""
-#     if [[ 1 < $# ]]; then 
-#       args="$args -o"
-#     fi
-#     shift 1
-#   done
-#   eval find $directory $recursive -type f "$args"
-# }
-# 
-# function Hash_check() {
-#   file_hash=$(md5sum $1)
-#   for hash in "${hash_array[@]}"; do
-#     if [[ ${hash%  *} = ${file_hash%  *} ]]; then
-#       return 0
-#     fi
-#   done
-#   hash_array[${#hash_array[@]}]="$file_hash" # hash_array+=("$file_hash") reqs. bash >= Bash 3.1
-#   return 1
-# }
-# 
-# while getopts ":r" OPTION; do
-#   case $OPTION in  
-#     r) 
-#       recursive=""
-#       shift $((OPTIND-1)); OPTIND=1  # shift $((OPTIND-1)); == shift 1 , just for coherence...
-#     ;;
-#     \?)
-#       echo "./dupechecker [options] PATH \"FILES1\" \"FILES2\""
-#       echo "Put FILES* expressions in quotes plox, yes globbing works.. uhmm should"
-#       exit 1	
-#     ;;
-#   esac
-# done
+def md5_for_file(filename, block_size=2**20):
+    f = open(filename)
+    md5 = hashlib.md5()
+    while True:
+        data = f.read(block_size)
+        if not data:
+            break
+        md5.update(data)
+    return md5.digest()
+
+class fileblock():
+    def __init__(self, inpath):
+        self.wholepath = inpath
+        self.size = os.path.getsize(inpath)
+        self.md5 = ""
 
 
+## Rip out any genuine paths in the args
+for arg in sys.argv:
+    if os.path.isdir(arg):
+        directory = arg
+
+## Handle Args
 try:
     opts, args = getopt.gnu_getopt( sys.argv, "ry", ["recursive", "yes-to-all"] )
 
@@ -62,29 +45,23 @@ for o, a in opts:
         recursive = True
     elif o in ("-y", "--yes-to-all"):
         ask = False
-    else:
+
+## Check that we've got a valid filepath
+if os.path.isdir(directory) == False:
+    print "Error! " + directory + " is not a valid directory! Exiting."
+    sys.exit(' ')
+
+## Lists used for the hash checking
+filestats = []
 
 ##MAIN
-if [[ ! -z $@ ]] && [[ -d $1 ]]; then
-  directory=$1
-  shift 1
-fi
-
-old_IFS="$IFS"
-IFS='\
-'
-for file in $(Get_list "$@"); do
-  if Hash_check $file; then
-    echo "$file COLLISION $hash"
-    echo "collision $file" #rm $file
-  else
-    echo $file 
-  fi
-done
-IFS="$old_IFS"
+#Get a list of files only (no dirs)
+for tempfile in os.listdir(directory):
+    if os.path.isfile(directory + tempfile):
+        filestats.append( fileblock( directory + tempfile ) )
 
 
-
-
-
+for tempfile in filestats:
+    print "File: " + tempfile.wholepath
+    print "Size: " + str(tempfile.size)
 
