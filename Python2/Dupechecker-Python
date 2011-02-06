@@ -41,6 +41,17 @@ def md5_for_file(filename, block_size=2**20):
         md5.update(data)
     return md5.digest()
 
+def usage():
+    print "======================================================"
+    print "Usage: Dupechecker-Python [OPTION] <directory>"
+    print "Script to remove duplicate files"
+    print " "
+    print " -r/--recursive    recurse through directories"
+    print " -y/--yes-to-all   remove duplicates without prompting"
+    print " -h/--help         this help text"
+    print "======================================================"
+    sys.exit(' ')
+
 ## Rip out any genuine paths in the args
 for arg in sys.argv:
     if os.path.isdir(arg):
@@ -48,7 +59,7 @@ for arg in sys.argv:
 
 ## Handle Args
 try:
-    opts, args = getopt.gnu_getopt( sys.argv, "ry", ["recursive", "yes-to-all"] )
+    opts, args = getopt.gnu_getopt( sys.argv, "hry", ["help", "recursive", "yes-to-all"] )
 
 except getopt.GetoptError:
     print str(err)
@@ -59,6 +70,8 @@ for o, a in opts:
         recursive = True
     elif o in ("-y", "--yes-to-all"):
         ask = False
+    elif o in ("-h", "--help"):
+        usage()
 
 # Spit out a warnign if we're using the current dir
 if directory == "./":
