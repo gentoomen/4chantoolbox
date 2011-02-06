@@ -112,39 +112,44 @@ if not directory[ len(directory) - 1 ] == "/":
 #Get a list of files only (no dirs)
 add_dir(directory)
 
-# The real meat of it -- compare listed files.
-for i in range(len(filestats)):
-    startfile = filestats[i]
-    # be careful to check we haven't deleted either the file in a previous action
-    if not os.path.isfile(startfile.wholepath):
-        break
-
-    for e in range(i + 1, len(filestats)):
-        checkagainst = filestats[e]
+#to allow us to catch exceptions
+try:
+    # The real meat of it -- compare listed files.
+    for i in range(len(filestats)):
+        startfile = filestats[i]
         # be careful to check we haven't deleted either the file in a previous action
-        if not os.path.isfile(checkagainst.wholepath):
+        if not os.path.isfile(startfile.wholepath):
             break
 
-        if startfile.size == checkagainst.size:
-            showmatch(startfile, checkagainst)
+        for e in range(i + 1, len(filestats)):
+            checkagainst = filestats[e]
+            # be careful to check we haven't deleted either the file in a previous action
+            if not os.path.isfile(checkagainst.wholepath):
+                break
 
-            # Generate md5s if necessary
-            for f in (startfile, checkagainst):
-                if f.md5 == "":
-                    f.get_md5()
+            if startfile.size == checkagainst.size:
+                showmatch(startfile, checkagainst)
 
-            if startfile.md5 == checkagainst.md5:
-                print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
+                # Generate md5s if necessary
+                for f in (startfile, checkagainst):
+                    if f.md5 == "":
+                        f.get_md5()
+
+                if startfile.md5 == checkagainst.md5:
+                    print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
     
-                # Allowance for the automatic overwrite flag
-                if ask:
-                    choice = get_choice()
+                    # Allowance for the automatic overwrite flag
+                    if ask:
+                        choice = get_choice()
 
-                # In instructed to, delete the file    
-                if choice in ('y', 'yes') or not ask:
-                    remfile(startfile)
-                elif choice in ('o', 'other'):
-                    remfile(checkagainst)
+                    # In instructed to, delete the file    
+                    if choice in ('y', 'yes') or not ask:
+                        remfile(startfile)
+                    elif choice in ('o', 'other'):
+                        remfile(checkagainst)
 
-            else:
-                print "No md5 match."
+                else:
+                    print "No md5 match."
+except (KeyboardInterrupt, SystemExit):
+    print "\nInterrupted. Exciting cleanly."
+    sys.exit(' ')
