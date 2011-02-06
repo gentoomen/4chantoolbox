@@ -11,7 +11,7 @@ directory   = "./"        #default is current dir
 ask         = True        #defaults to requiring confirmation
 
 # All important list of files
-filestats = []
+filestats   = []
 
 class fileblock():
     def __init__(self, inpath):
@@ -48,7 +48,6 @@ def pretty_size(size):
             continue
         else:
             return round(size/float(lim/2**10),2).__str__()+suf
-
 
 def usage():
     print "======================================================"
@@ -100,7 +99,8 @@ for i in range(len(filestats)):
         if startfile.size == checkagainst.size:
 
             print "========================================="
-            print "File: " + startfile.wholepath + " is the same size as " + checkagainst.wholepath
+            print "File: " + startfile.wholepath
+            print "Matches: " + checkagainst.wholepath
             print "Size: " + str(startfile.size)
 
             # Generate md5s if necessary
