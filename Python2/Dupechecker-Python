@@ -60,8 +60,9 @@ def pretty_size(size):
             return round(size/float(lim/2**10),2).__str__()+suf
 
 def remfile(infile):
-    os.remove(infile.wholepath)
-    print infile.wholepath + " deleted."
+    if os.path.isfile(infile.wholepath):
+        os.remove(infile.wholepath)
+        print infile.wholepath + " deleted."
 
 def showmatch(filea, fileb):
     print "=========================== Size Match ==========================="
@@ -122,42 +123,42 @@ try:
     for i in range(len(filestats)):
         startfile = filestats[i]
         # be careful to check we haven't deleted either the file in a previous action
-        if not os.path.isfile(startfile.wholepath):
-            break
+        if os.path.isfile(startfile.wholepath):
 
-        for e in range(i + 1, len(filestats)):
-            checkagainst = filestats[e]
-            # be careful to check we haven't deleted either the file in a previous action
-            if not os.path.isfile(checkagainst.wholepath):
-                break
+            for e in range(i + 1, len(filestats)):
+                checkagainst = filestats[e]
+                # be careful to check we haven't deleted either the file in a previous action
+                if not os.path.isfile(checkagainst.wholepath):
+                    break
 
-            if startfile.size == checkagainst.size:
-                showmatch(startfile, checkagainst)
+                if startfile.size == checkagainst.size:
+                    showmatch(startfile, checkagainst)
 
-                # Generate md5s if necessary
-                for f in (startfile, checkagainst):
-                    if f.md5 == "":
-                        f.get_md5()
+                    # Generate md5s if necessary
+                    for f in (startfile, checkagainst):
+                        if f.md5 == "":
+                            f.get_md5()
                 
-                if dummy:
-                    print "=== Full md5 match found ==="
-
-                else:
-                    if startfile.md5 == checkagainst.md5:
-                        print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
-    
-                        # Allowance for the automatic overwrite flag
-                        if ask:
-                            choice = get_choice()
-
-                        # In instructed to, delete the file    
-                        if choice in ('y', 'yes', 'b', 'both') or not ask:
-                            remfile(startfile)
-                        if choice in ('o', 'other', 'b', 'both'):
-                            remfile(checkagainst)
+                    if dummy:
+                        print "=== Full md5 match found ==="
 
                     else:
-                        print "No md5 match."
+                        if startfile.md5 == checkagainst.md5:
+                            print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
+    
+                            # Allowance for the automatic overwrite flag
+                            if ask:
+                                choice = get_choice()
+
+                            # In instructed to, delete the file    
+                            if choice in ('o', 'other', 'b', 'both'):
+                                remfile(checkagainst)
+                            if choice in ('y', 'yes', 'b', 'both') or not ask:
+                                remfile(startfile)
+                                break
+
+                        else:
+                            print "No md5 match."
 except (KeyboardInterrupt, SystemExit):
-    print "\nInterrupted. Exciting cleanly."
+    print "\nInterrupted. Excited cleanly."
     sys.exit(' ')
