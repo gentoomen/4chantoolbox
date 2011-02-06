@@ -10,10 +10,13 @@ recursive   = False       #defaults to not recursive
 directory   = "./"        #default is current dir
 ask         = True        #defaults to requiring confirmation
 
+# All important list of files
+filestats = []
+
 def add_dir(dirpath):
     print "Scanning directory " + dirpath
     for tempfile in os.listdir(dirpath):
-        if os.path.isdir(dirpath + tempfile) and recursive:
+        if os.path.isdir(dirpath + tempfile):
             add_dir(dirpath + tempfile)
         elif os.path.isfile(dirpath + tempfile):
             filestats.append( fileblock( dirpath + tempfile ) )
@@ -57,15 +60,11 @@ for o, a in opts:
     elif o in ("-y", "--yes-to-all"):
         ask = False
 
-## Check that we've got a valid filepath
-if os.path.isdir(directory) == False:
-    print "Error! " + directory + " is not a valid directory! Exiting."
-    sys.exit(' ')
+# Spit out a warnign if we're using the current dir
+if directory == "./":
+    print "No valid directory given. Usding current directory."
 
 ## Main part
-# Lists used for the hash checking
-filestats = []
-
 #Get a list of files only (no dirs)
 add_dir(directory)
 
