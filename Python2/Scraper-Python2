@@ -78,7 +78,7 @@ while 1:
         # Grab the page and split out the image URLS
         html = urllib.urlopen(url);
         v_print("Page " + url + " downloaded. Processing images.")
-        images = re.findall('http://images.4chan.org/g/src/\d{13}.(?:png|gif|jpg)', html.read())
+        images = re.findall('http://images.4chan.org/[a-zA-z]{1,4}/src/\d{13}.(?:png|gif|jpg)', html.read())
 
         for image in images:
             # Split the image name from the URL and get a full path to write to
