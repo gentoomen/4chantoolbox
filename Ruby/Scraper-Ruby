@@ -34,7 +34,7 @@ def usage
 end
 
 ## Handle URL arg
-if ARGV.length == 1 then
+if ARGV.length == 0 then
     usage
 else
     @url = ARGV.pop
