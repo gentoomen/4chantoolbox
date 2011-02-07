@@ -1,3 +1,5 @@
+#!/usr/bin/ruby
+
 ## Libraries
 require"getoptlong"
 require"open-uri"
@@ -83,7 +85,7 @@ loop do
         # Ruby's matchdata stuff doesn't show all occurrences of that pattern, just the first one.
         # Until I can recall what the correct way to do that is, here's a temporary fix:
         images = []
-        html.read.gsub!(/http:\/\/images\.4chan\.org\/g\/src\/\d+\.(?:png|gif|jpg)/) do |image|
+        html.read.gsub!(/http:\/\/images\.4chan\.org\/[a-zA-Z0-9]{1,4}\/src\/\d+\.(?:png|gif|jpg)/) do |image|
             images << image
         end
         
