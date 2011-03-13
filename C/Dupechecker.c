@@ -3,10 +3,12 @@ Finds duplicate files based on md5 and filesize
 Created by LAMMJohnson for the gentoomen 4chantoolbox project
 */
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/dir.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 
 #include <openssl/md5.h>
@@ -33,6 +35,7 @@ char* get_full_path(char* path, char* forf);
 char* get_hash(fileLL *f);
 void handleargs(int argc, char** argv);
 int is_dir(char* path);
+void show_match(fileLL *a, fileLL *b);
 void usage(void);
 void work_through_dir(char* path);
 
@@ -84,10 +87,9 @@ compare_files(void) {
                 if(!fc->md5hash)
                     fc->md5hash = get_hash(fc);
 
-                /* Here we need to output a match if it's made and give the user a choice of files to delete. */
-                printf("Files %s and %s have matching sizes: %d and %d.\n", f->path, fc->path, f->size, fc->size);
-                if(!strcmp(f->md5hash, fc->md5hash))
-                    puts("Hashes also match.");
+                show_match(f, fc);
+                if(strcmp(f->md5hash, fc->md5hash))
+                    puts("But hashes do not match.");
             }
             fc = fc->next;
         }
@@ -114,6 +116,23 @@ get_full_path(char* path, char* forf) {
     return c;
 }
 
+char*
+get_hash(fileLL *f) {
+    char *c, *file_buffer;
+    int file_descript;
+    
+    c = malloc((MD5_DIGEST_LENGTH + 1) * sizeof(char));
+    c[MD5_DIGEST_LENGTH] = '\0';
+
+    file_descript = open(f->path, O_RDONLY);
+    if(file_descript < 0) exit(-1);
+    file_buffer = mmap(0, f->size, PROT_READ, MAP_SHARED, file_descript, 0);
+
+    MD5((unsigned char*) file_buffer, f->size, c);
+
+    return c;
+}
+
 void
 handleargs(int argc, char** argv) {
     int i;
@@ -135,15 +154,6 @@ handleargs(int argc, char** argv) {
     }
 }
 
-char*
-get_hash(fileLL *f) {
-    char* c = malloc((MD5_DIGEST_LENGTH + 1) * sizeof(char));
-
-    c[0] = '\0';
-
-    return c;
-}
-
 int
 is_dir(char* path) {
     DIR *dir = opendir(path);
@@ -154,6 +164,14 @@ is_dir(char* path) {
 
     closedir(dir);
     return ret;
+}
+
+void
+show_match(fileLL *a, fileLL *b) {
+    printf( "=========================== Size Match ===========================\n" );
+    printf( "File:    %s\n", a->path );
+    printf( "Matches: %s\n", b->path );
+    printf( "Size:    %d\n", a->size );
 }
 
 void
@@ -205,11 +223,6 @@ int main(int argc, char** argv) {
 
     work_through_dir(workdir);
     
-    /* Shows all the files we have collected info about */
-    fileLL *f;
-    for(f = firstfile; f; f = f->next)
-        printf("FILE: %s\nSIZE:%d\n\n", f->path, f->size);
-
     compare_files();
 
     return 0;
