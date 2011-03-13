@@ -48,6 +48,8 @@ add_file_to_LL(char* path) {
     stat(path, &st);
     f->size = st.st_size;
 
+    f->md5hash = NULL;
+
     if (!firstfile) {
         firstfile = f;
         lastfile = firstfile;
@@ -73,7 +75,7 @@ compare_files(void) {
     while(f) {
         fc = f->next;
         while(fc) {
-            if(f->size == fc->size)
+            if(f->size == fc->size) {
                 /* At this point we're iterating through the linked list comparing every file to every other file. */
                 /* If we're in this loop we've found files of matching size. */
                 /* Now we need to fill in hashes if we don't already have them */
@@ -81,8 +83,12 @@ compare_files(void) {
                     f->md5hash = get_hash(f);
                 if(!fc->md5hash)
                     fc->md5hash = get_hash(fc);
-                printf("Files %s and %s have matching sizes: %d and %d.\n", f->path, fc->path, f->size, fc->size);
 
+                /* Here we need to output a match if it's made and give the user a choice of files to delete. */
+                printf("Files %s and %s have matching sizes: %d and %d.\n", f->path, fc->path, f->size, fc->size);
+                if(!strcmp(f->md5hash, fc->md5hash))
+                    puts("Hashes also match.");
+            }
             fc = fc->next;
         }
         f = f->next;
@@ -131,8 +137,11 @@ handleargs(int argc, char** argv) {
 
 char*
 get_hash(fileLL *f) {
+    char* c = malloc((MD5_DIGEST_LENGTH + 1) * sizeof(char));
 
-    return NULL;
+    c[0] = '\0';
+
+    return c;
 }
 
 int
