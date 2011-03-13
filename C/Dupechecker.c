@@ -20,7 +20,8 @@ typedef struct fileLL fileLL;
 struct fileLL {
     char* path;
     unsigned char* md5hash;
-    unsigned int size;
+    unsigned long size;
+    char* hrsize;
     fileLL *next, *prev;
 };
 
@@ -42,6 +43,7 @@ char* get_hash(fileLL *f);
 void handleargs(int argc, char** argv);
 void handle_match(fileLL *f, fileLL *fc);
 int is_dir(char* path);
+char* pretty_size(unsigned long in);
 void print_hash(unsigned char* str);
 void usage(void);
 void work_through_dir(char* path);
@@ -58,6 +60,7 @@ add_file_to_LL(char* path) {
 
     stat(path, &st);
     f->size = st.st_size;
+    f->hrsize = pretty_size(f->size);
 
     f->md5hash = NULL;
 
@@ -97,8 +100,6 @@ compare_files(void) {
 
                 if(!strcmp(currfile->md5hash, fc->md5hash))
                     handle_match(currfile, fc);
-                else
-                    puts("But hashes do not match.");
             }
             fc = fc->next;
         }
@@ -201,7 +202,7 @@ handle_match(fileLL *f, fileLL *fc) {
     printf( "=========================== Size Match ===========================\n" );
     printf( "File:    %s\n", f->path );
     printf( "Matches: %s\n", fc->path );
-    printf( "Size:    %d\n", f->size );
+    printf( "Size:    %s\n", f->hrsize );
     print_hash(f->md5hash);
 
     if (dummy){
@@ -244,6 +245,23 @@ is_dir(char* path) {
 
     closedir(dir);
     return ret;
+}
+
+char*
+pretty_size(unsigned long in) {
+    int i = 0;
+    double size = in;
+    char buf[100], *final;
+    const char* units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
+    while (size > 1024) {
+        size /= 1024;
+        i++;
+    }
+    sprintf(buf, "%.*f %s", i, size, units[i]);
+
+    final = malloc((strlen(buf) + 2) * sizeof(char));
+    strcpy(final, buf);
+    return final;
 }
 
 void
@@ -308,9 +326,7 @@ int main(int argc, char** argv) {
         puts("No valid directory given. Using current directory.");
 
     work_through_dir(workdir);
-    
     compare_files();
-
     puts("Checking finished. Exiting successfully.");
 
     return 0;
