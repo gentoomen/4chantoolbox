@@ -1,19 +1,128 @@
-#!/usr/bin/python2.7
-# dupechecker
-# Finds duplicate files based on md5 and filesize
-# Created by LAMMJohnson for the gentoomen 4chantoolbox project
+/*
+Finds duplicate files based on md5 and filesize
+Created by LAMMJohnson for the gentoomen 4chantoolbox project
+*/
 
-import sys, getopt, os, hashlib
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/dir.h>
 
-## Defaults
-recursive   = False       #defaults to not recursive
-directory   = "./"        #default is current dir
-ask         = True        #defaults to requiring confirmation
-dummy       = False
+/* Globals */
+unsigned int recursive   = 1;       /* defaults to not recursive */
+char*        workdir     = "./";    /* default is current dir */
+unsigned int ask         = 1;       /* defaults to requiring confirmation */
+unsigned int dummy       = 0;       /* if true, we don't actually delete anything */
 
-# All important list of files
-filestats   = []
+void errout(char* str);
+char* get_full_path(char* path, char* forf);
+int is_dir(char* path);
+void usage(void);
+void work_through_dir(char* path);
 
+void
+errout(char* str) {
+    if (str)
+        puts(str);
+    exit(1);
+}
+
+char*
+get_full_path(char* path, char* forf) {
+    char* c = malloc( (strlen(path) + strlen(forf) + 2) * sizeof(char) );
+    c[0] = '\0';
+    strcat(c, path);
+    strcat(c, forf);
+    if (is_dir(c))
+        strcat(c, "/");
+    return c;
+}
+
+int
+is_dir(char* path) {
+    DIR *dir = opendir(path);
+    int ret = 0;
+
+    if (dir)
+        ret = 1;
+
+    closedir(dir);
+    return ret;
+}
+
+void
+usage(void) {
+    puts("==================================================================");
+    puts("Usage: Dupechecker-Python [OPTION] <directory>");
+    puts("Script to remove duplicate files");
+    puts(" ");
+    puts(" -d/--dummy        No deletion. Output findings without prompting");
+    puts(" -r/--recursive    Recurse through directories");
+    puts(" -y/--yes-to-all   Remove duplicates without prompting");
+    puts(" -h/--help         This help text");
+    puts("==================================================================");
+    exit(1);
+}
+
+void
+work_through_dir(char* path) {
+    struct dirent *ent;
+    DIR* dir = opendir(path);
+    char* fullpath;
+
+    while((ent = readdir(dir))){
+        /* Skip over them if we're getting ".." or "." from readdir() */
+        if(!strcmp("..", ent->d_name) || !strcmp(".", ent->d_name))
+            continue;
+
+        fullpath = get_full_path(path, ent->d_name);
+
+        if(is_dir(fullpath)) {
+            if(recursive)
+                work_through_dir(fullpath);
+        }
+        /* Otherwise it's just a normal file and we need to work our magic */
+        else {
+            printf ("%s\n", fullpath);
+        }
+        free(fullpath);
+    }
+    closedir(dir);
+}
+
+int main(int argc, char** argv) {
+    int i;
+
+    for (i = 1; i < argc; i++){
+        if ( !strcmp("-d", argv[i]) || !strcmp("--dummy", argv[i]) ) {
+            puts("Dummy mode on.");
+            dummy = 1;
+        }
+        else if ( !strcmp("-r", argv[i]) || !strcmp("--recursive", argv[i]) ) {
+            puts("Recursive mode on.");
+            recursive = 1;
+        }
+        else if ( !strcmp("-y", argv[i]) || !strcmp("--yes-to-all", argv[i]) ) {
+            puts("Assuming an answer of 'yes' to all questions.");
+            ask = 0;
+        }
+        else if ( !strcmp("-h", argv[i]) || !strcmp("--help", argv[i]) ) {
+            usage();
+        }
+        else if( is_dir( argv[i] ) )
+            workdir = argv[i];
+        else
+            printf("Unrecognised command/is not a valid path: %s\nContinuing anyway.\n", argv[i]);
+    }
+
+    if (!is_dir(workdir))
+        errout("Failed to open given directory.");
+
+    work_through_dir(workdir);
+    
+    return 0;
+}
+/*
 class fileblock():
     def __init__(self, inpath):
         self.wholepath = inpath
@@ -155,3 +264,4 @@ for i in range(len(filestats)):
                                 break
                     else:
                         print "No md5 match."
+*/
