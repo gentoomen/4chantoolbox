@@ -30,6 +30,7 @@ unsigned int recursive   = 1;       /* defaults to not recursive */
 char*        workdir     = "./";    /* default is current dir */
 unsigned int ask         = 1;       /* defaults to requiring confirmation */
 unsigned int dummy       = 0;       /* if true, we don't actually delete anything */
+unsigned int verbose     = 0;       /* Enables additional output */
 
 fileLL *firstfile = NULL, *lastfile = NULL, *currfile = NULL;
 
@@ -82,11 +83,13 @@ void
 compare_files(void) {
     fileLL *fc;
     currfile = firstfile;
+    int match;
 
     if(!currfile)
         errout("No files to compare!");
 
     while(currfile) {
+        match = 0;
         fc = currfile->next;
         while(fc) {
             if(currfile->size == fc->size) {
@@ -98,11 +101,16 @@ compare_files(void) {
                 if(!fc->md5hash)
                     fc->md5hash = get_hash(fc);
 
-                if(!strcmp(currfile->md5hash, fc->md5hash))
+                if(!strcmp(currfile->md5hash, fc->md5hash)) {
                     handle_match(currfile, fc);
+                    match = 1;
+                }
             }
             fc = fc->next;
         }
+        if (verbose && !match)
+            printf("======== No matches found for file %s\n", currfile->path);
+
         currfile = currfile->next;
     }
 
@@ -139,6 +147,7 @@ void
 free_fileLL(fileLL *f) {
     free(f->path);
     free(f->md5hash);
+    free(f->hrsize);
     free(f);
 }
 
@@ -159,6 +168,9 @@ get_hash(fileLL *f) {
     char *file_buffer;
     int file_descript;
     
+    if (verbose)
+        printf("======== Getting hash for %s\n", f->path);
+
     c = malloc((MD5_DIGEST_LENGTH + 1) * sizeof(char));
     c[MD5_DIGEST_LENGTH] = '\0';
 
@@ -184,6 +196,8 @@ handleargs(int argc, char** argv) {
             ask = 0;
         else if ( !strcmp("-h", argv[i]) || !strcmp("--help", argv[i]) )
             usage();
+        else if ( !strcmp("-v", argv[i]) || !strcmp("--verbose", argv[i]) )
+            verbose = 1;
         else if( is_dir( argv[i] ) ) {
             workdir = argv[i];
         }
@@ -251,7 +265,7 @@ char*
 pretty_size(unsigned long in) {
     int i = 0;
     double size = in;
-    char buf[100], *final;
+    char buf[15], *final;
     const char* units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
     while (size > 1024) {
         size /= 1024;
@@ -284,6 +298,7 @@ usage(void) {
     puts(" -r/--recursive    Recurse through directories");
     puts(" -y/--yes-to-all   Remove duplicates without prompting");
     puts(" -h/--help         This help text");
+    puts(" -v/--verbose      Enable additional output");
     puts("==================================================================");
     exit(1);
 }
