@@ -19,7 +19,7 @@ Created by LAMMJohnson for the gentoomen 4chantoolbox project
 typedef struct fileLL fileLL;
 struct fileLL {
     char* path;
-    char* md5hash;
+    unsigned char* md5hash;
     unsigned int size;
     fileLL *next, *prev;
 };
@@ -32,6 +32,7 @@ unsigned int dummy       = 0;       /* if true, we don't actually delete anythin
 
 fileLL *firstfile = NULL, *lastfile = NULL, *currfile = NULL;
 
+/* Predecs */
 void add_file_to_LL(char* path);
 void do_delete(fileLL *f);
 void errout(char* str);
@@ -41,10 +42,12 @@ char* get_hash(fileLL *f);
 void handleargs(int argc, char** argv);
 void handle_match(fileLL *f, fileLL *fc);
 int is_dir(char* path);
+void print_hash(unsigned char* str);
 void show_match(fileLL *a, fileLL *b);
 void usage(void);
 void work_through_dir(char* path);
 
+/* Functions */
 void
 add_file_to_LL(char* path) {
     fileLL* f;
@@ -153,7 +156,8 @@ get_full_path(char* path, char* forf) {
 
 char*
 get_hash(fileLL *f) {
-    char *c, *file_buffer;
+    unsigned char *c;
+    char *file_buffer;
     int file_descript;
     
     c = malloc((MD5_DIGEST_LENGTH + 1) * sizeof(char));
@@ -164,6 +168,7 @@ get_hash(fileLL *f) {
     file_buffer = mmap(0, f->size, PROT_READ, MAP_SHARED, file_descript, 0);
 
     MD5((unsigned char*) file_buffer, f->size, c);
+    
 
     return c;
 }
@@ -198,9 +203,9 @@ handle_match(fileLL *f, fileLL *fc) {
         return;
     }
 
-    printf( "MD5 match found! Would you like to delete duplicate file %s ?\n", fc->path );
-
     if(ask) {
+        printf( "MD5 match found! Would you like to delete duplicate file %s ?\n", fc->path );
+
         /* Sanitary method of getting the user's choice */
         do {
             puts("(y)es / (n)o / the (o)ther file / (b)oth ?");
@@ -236,11 +241,22 @@ is_dir(char* path) {
 }
 
 void
+print_hash(unsigned char* str) {
+    int i;
+    printf("Hash is: ");
+    for(i = 0; i < MD5_DIGEST_LENGTH; i++) {
+        printf("%02x", str[i]);
+    }
+    printf("\n");
+}
+
+void
 show_match(fileLL *a, fileLL *b) {
     printf( "=========================== Size Match ===========================\n" );
     printf( "File:    %s\n", a->path );
     printf( "Matches: %s\n", b->path );
     printf( "Size:    %d\n", a->size );
+    print_hash(a->md5hash);
 }
 
 void
