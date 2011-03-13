@@ -8,18 +8,45 @@ Created by LAMMJohnson for the gentoomen 4chantoolbox project
 #include <string.h>
 #include <sys/dir.h>
 
+typedef struct fileLL fileLL;
+struct fileLL {
+    char* path;
+    char* md5hash;
+    fileLL *next;
+};
+
 /* Globals */
 unsigned int recursive   = 1;       /* defaults to not recursive */
 char*        workdir     = "./";    /* default is current dir */
 unsigned int ask         = 1;       /* defaults to requiring confirmation */
 unsigned int dummy       = 0;       /* if true, we don't actually delete anything */
 
+fileLL *firstfile = NULL, *lastfile = NULL;
+
+void add_file_to_LL(char* path);
 void errout(char* str);
 char* get_full_path(char* path, char* forf);
 void handleargs(int argc, char** argv);
 int is_dir(char* path);
 void usage(void);
 void work_through_dir(char* path);
+
+void
+add_file_to_LL(char* path) {
+    fileLL* f = malloc(sizeof(fileLL));
+
+    f->path = malloc((strlen(path) + 1) * sizeof(char));
+    strcpy(f->path, path);
+
+    if (!firstfile) {
+        firstfile = f;
+        lastfile = firstfile;
+    }
+    else {
+        lastfile->next = f;
+        lastfile = lastfile->next;
+    }
+}
 
 void
 errout(char* str) {
@@ -101,12 +128,12 @@ work_through_dir(char* path) {
 
         if(is_dir(fullpath)) {
             if(recursive)
-                work_through_dir(fullpath);
+                work_through_dir(fullpath); /* Recursively start working on a subdir */
         }
         /* Otherwise it's just a normal file and we need to work our magic */
-        else {
-            printf ("%s\n", fullpath);
-        }
+        else
+            add_file_to_LL(fullpath);
+
         free(fullpath);
     }
     closedir(dir);
@@ -121,6 +148,11 @@ int main(int argc, char** argv) {
 
     work_through_dir(workdir);
     
+    fileLL *f;
+    for(f = firstfile; f; f = f->next)
+        printf("FILE: %s\n", f->path);
+
+
     return 0;
 }
 /*
