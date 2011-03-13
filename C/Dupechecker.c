@@ -188,8 +188,10 @@ handleargs(int argc, char** argv) {
         else if( is_dir( argv[i] ) ) {
             workdir = argv[i];
         }
-        else
-            printf("Unrecognised command/is not a valid path: %s\nContinuing anyway.\n", argv[i]);
+        else {
+            printf("Unrecognised command/is not a valid path: %s\n", argv[i]);
+            usage();
+        }
     }
 }
 
