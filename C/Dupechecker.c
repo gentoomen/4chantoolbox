@@ -9,6 +9,8 @@ Created by LAMMJohnson for the gentoomen 4chantoolbox project
 #include <sys/dir.h>
 #include <sys/stat.h>
 
+#include <openssl/md5.h>
+
 typedef struct fileLL fileLL;
 struct fileLL {
     char* path;
@@ -28,6 +30,7 @@ fileLL *firstfile = NULL, *lastfile = NULL;
 void add_file_to_LL(char* path);
 void errout(char* str);
 char* get_full_path(char* path, char* forf);
+char* get_hash(fileLL *f);
 void handleargs(int argc, char** argv);
 int is_dir(char* path);
 void usage(void);
@@ -73,6 +76,11 @@ compare_files(void) {
             if(f->size == fc->size)
                 /* At this point we're iterating through the linked list comparing every file to every other file. */
                 /* If we're in this loop we've found files of matching size. */
+                /* Now we need to fill in hashes if we don't already have them */
+                if(!f->md5hash)
+                    f->md5hash = get_hash(f);
+                if(!fc->md5hash)
+                    fc->md5hash = get_hash(fc);
                 printf("Files %s and %s have matching sizes: %d and %d.\n", f->path, fc->path, f->size, fc->size);
 
             fc = fc->next;
@@ -119,6 +127,12 @@ handleargs(int argc, char** argv) {
         else
             printf("Unrecognised command/is not a valid path: %s\nContinuing anyway.\n", argv[i]);
     }
+}
+
+char*
+get_hash(fileLL *f) {
+
+    return NULL;
 }
 
 int
