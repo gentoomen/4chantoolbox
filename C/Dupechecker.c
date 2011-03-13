@@ -13,6 +13,9 @@ Created by LAMMJohnson for the gentoomen 4chantoolbox project
 
 #include <openssl/md5.h>
 
+#define INLIM 6
+
+/* Structs */
 typedef struct fileLL fileLL;
 struct fileLL {
     char* path;
@@ -149,7 +152,6 @@ handleargs(int argc, char** argv) {
         else if ( !strcmp("-h", argv[i]) || !strcmp("--help", argv[i]) )
             usage();
         else if( is_dir( argv[i] ) ) {
-            puts("DING!");
             workdir = argv[i];
         }
         else
@@ -159,23 +161,24 @@ handleargs(int argc, char** argv) {
 
 void
 handle_match(fileLL *f, fileLL *fc) {
-    char c;
+    char c[INLIM];
+    int i;
 
     if (dummy){
         puts("=== Full md5 match found ===");
         return;
     }
 
-    printf( "Match found! Would you like to delete duplicate file %s ?\n", fc->path );
+    printf( "MD5 match found! Would you like to delete duplicate file %s ?\n", fc->path );
 
-    c = getchar();
-
-    /*     else: */
-    /*         print "Match found! Would you like to delete duplicate file " + startfile.wholepath + "" */
-
-    /*             # Allowance for the automatic overwrite flag */
-    /*             if ask: */
-    /*                 choice = get_choice() */
+    /* Sanitary method of getting the user's choice */
+    do {
+        for (i = 0; i < INLIM && (c[i] = getchar()) != '\n'; i++);
+        if (c[i] != '\n')
+            while(getchar() != '\n');
+        c[i] = '\0';
+    }
+    while (strcmp(c, "o") && strcmp(c, "other") && strcmp(c, "b") && strcmp(c, "both") && strcmp(c, "y") && strcmp(c, "yes") && strcmp(c, "n") && strcmp(c, "no"));
 
     /*                     # In instructed to, delete the file     */
     /*                     if choice in ('o', 'other', 'b', 'both'): */
