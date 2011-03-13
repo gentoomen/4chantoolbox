@@ -30,10 +30,12 @@ char*        workdir     = "./";    /* default is current dir */
 unsigned int ask         = 1;       /* defaults to requiring confirmation */
 unsigned int dummy       = 0;       /* if true, we don't actually delete anything */
 
-fileLL *firstfile = NULL, *lastfile = NULL;
+fileLL *firstfile = NULL, *lastfile = NULL, *currfile = NULL;
 
 void add_file_to_LL(char* path);
+void do_delete(fileLL *f);
 void errout(char* str);
+void free_fileLL(fileLL *f);
 char* get_full_path(char* path, char* forf);
 char* get_hash(fileLL *f);
 void handleargs(int argc, char** argv);
@@ -73,35 +75,54 @@ add_file_to_LL(char* path) {
 
 void
 compare_files(void) {
-    fileLL *f, *fc;
-    f = firstfile;
+    fileLL *fc;
+    currfile = firstfile;
 
-    if(!f)
+    if(!currfile)
         errout("No files to compare!");
 
-    while(f) {
-        fc = f->next;
+    while(currfile) {
+        fc = currfile->next;
         while(fc) {
-            if(f->size == fc->size) {
+            if(currfile->size == fc->size) {
                 /* At this point we're iterating through the linked list comparing every file to every other file. */
                 /* If we're in this loop we've found files of matching size. */
                 /* Now we need to fill in hashes if we don't already have them */
-                if(!f->md5hash)
-                    f->md5hash = get_hash(f);
+                if(!currfile->md5hash)
+                    currfile->md5hash = get_hash(currfile);
                 if(!fc->md5hash)
                     fc->md5hash = get_hash(fc);
 
-                show_match(f, fc);
-                if(!strcmp(f->md5hash, fc->md5hash))
-                    handle_match(f, fc);
+                show_match(currfile, fc);
+                if(!strcmp(currfile->md5hash, fc->md5hash))
+                    handle_match(currfile, fc);
                 else
                     puts("But hashes do not match.");
             }
             fc = fc->next;
         }
-        f = f->next;
+        currfile = currfile->next;
     }
 
+}
+
+void
+do_delete(fileLL *f) {
+    if (remove(f->path) == -1)
+        printf("Error in deleting file %s !\n", f->path);
+    else
+        printf("File %s removed successfully.\n", f->path);
+
+    /* Protection we need when deleting the file we're currently matching against */
+    if(currfile == f)
+        currfile = currfile->next;
+
+    if (f->prev)
+        f->prev->next = f->next;
+    if (f->next)
+        f->next->prev = f->prev;
+
+    free_fileLL(f);
 }
 
 void
@@ -109,6 +130,13 @@ errout(char* str) {
     if (str)
         puts(str);
     exit(1);
+}
+
+void
+free_fileLL(fileLL *f) {
+    free(f->path);
+    free(f->md5hash);
+    free(f);
 }
 
 char*
@@ -173,6 +201,7 @@ handle_match(fileLL *f, fileLL *fc) {
 
     /* Sanitary method of getting the user's choice */
     do {
+        puts("(y)es / (n)o / the (o)ther file / (b)oth ?");
         for (i = 0; i < INLIM && (c[i] = getchar()) != '\n'; i++);
         if (c[i] != '\n')
             while(getchar() != '\n');
@@ -180,13 +209,13 @@ handle_match(fileLL *f, fileLL *fc) {
     }
     while (strcmp(c, "o") && strcmp(c, "other") && strcmp(c, "b") && strcmp(c, "both") && strcmp(c, "y") && strcmp(c, "yes") && strcmp(c, "n") && strcmp(c, "no"));
 
-    /*                     # In instructed to, delete the file     */
-    /*                     if choice in ('o', 'other', 'b', 'both'): */
-    /*                         remfile(checkagainst) */
-    /*                         if choice in ('y', 'yes', 'b', 'both') or not ask: */
-    /*                             remfile(startfile) */
-    /*                             break */
+    /* Conditions under which we delete the file f. More dangerous because we have to account for moving our pointers */
+    if(!strcmp(c, "o") || !strcmp(c, "other") || !strcmp(c, "b") || !strcmp(c, "both" ))
+        do_delete(f);
 
+    /* Conditions under which we delete the later file */
+    if(!strcmp(c, "y") || !strcmp(c, "yes") || !strcmp(c, "b") || !strcmp(c, "both" ))
+        do_delete(fc);
 }
 
 int
@@ -274,7 +303,6 @@ def get_choice():
     choose = ""
     validOptions = ( 'y', 'n', 'o', 'b', 'yes', 'no', 'other', 'both')
     while not choose in validOptions :
-        choose = raw_input('(y)es / (n)o / the (o)ther file / (b)oth ? ')
     return choose
 
 def pretty_size(size):
