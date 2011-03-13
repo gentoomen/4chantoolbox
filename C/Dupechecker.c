@@ -43,7 +43,6 @@ void handleargs(int argc, char** argv);
 void handle_match(fileLL *f, fileLL *fc);
 int is_dir(char* path);
 void print_hash(unsigned char* str);
-void show_match(fileLL *a, fileLL *b);
 void usage(void);
 void work_through_dir(char* path);
 
@@ -96,7 +95,6 @@ compare_files(void) {
                 if(!fc->md5hash)
                     fc->md5hash = get_hash(fc);
 
-                show_match(currfile, fc);
                 if(!strcmp(currfile->md5hash, fc->md5hash))
                     handle_match(currfile, fc);
                 else
@@ -200,6 +198,12 @@ handle_match(fileLL *f, fileLL *fc) {
     char c[INLIM];
     int i;
 
+    printf( "=========================== Size Match ===========================\n" );
+    printf( "File:    %s\n", f->path );
+    printf( "Matches: %s\n", fc->path );
+    printf( "Size:    %d\n", f->size );
+    print_hash(f->md5hash);
+
     if (dummy){
         puts("=== Full md5 match found ===");
         return;
@@ -250,15 +254,6 @@ print_hash(unsigned char* str) {
         printf("%02x", str[i]);
     }
     printf("\n");
-}
-
-void
-show_match(fileLL *a, fileLL *b) {
-    printf( "=========================== Size Match ===========================\n" );
-    printf( "File:    %s\n", a->path );
-    printf( "Matches: %s\n", b->path );
-    printf( "Size:    %d\n", a->size );
-    print_hash(a->md5hash);
 }
 
 void
