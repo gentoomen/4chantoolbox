@@ -16,6 +16,7 @@ unsigned int dummy       = 0;       /* if true, we don't actually delete anythin
 
 void errout(char* str);
 char* get_full_path(char* path, char* forf);
+void handleargs(int argc, char** argv);
 int is_dir(char* path);
 void usage(void);
 void work_through_dir(char* path);
@@ -36,6 +37,27 @@ get_full_path(char* path, char* forf) {
     if (is_dir(c))
         strcat(c, "/");
     return c;
+}
+
+void
+handleargs(int argc, char** argv) {
+    int i;
+    for (i = 1; i < argc; i++) {
+        if ( !strcmp("-d", argv[i]) || !strcmp("--dummy", argv[i]) )
+            dummy = 1;
+        else if ( !strcmp("-r", argv[i]) || !strcmp("--recursive", argv[i]) )
+            recursive = 1;
+        else if ( !strcmp("-y", argv[i]) || !strcmp("--yes-to-all", argv[i]) )
+            ask = 0;
+        else if ( !strcmp("-h", argv[i]) || !strcmp("--help", argv[i]) )
+            usage();
+        else if( is_dir( argv[i] ) ) {
+            puts("DING!");
+            workdir = argv[i];
+        }
+        else
+            printf("Unrecognised command/is not a valid path: %s\nContinuing anyway.\n", argv[i]);
+    }
 }
 
 int
@@ -91,29 +113,8 @@ work_through_dir(char* path) {
 }
 
 int main(int argc, char** argv) {
-    int i;
 
-    for (i = 1; i < argc; i++){
-        if ( !strcmp("-d", argv[i]) || !strcmp("--dummy", argv[i]) ) {
-            puts("Dummy mode on.");
-            dummy = 1;
-        }
-        else if ( !strcmp("-r", argv[i]) || !strcmp("--recursive", argv[i]) ) {
-            puts("Recursive mode on.");
-            recursive = 1;
-        }
-        else if ( !strcmp("-y", argv[i]) || !strcmp("--yes-to-all", argv[i]) ) {
-            puts("Assuming an answer of 'yes' to all questions.");
-            ask = 0;
-        }
-        else if ( !strcmp("-h", argv[i]) || !strcmp("--help", argv[i]) ) {
-            usage();
-        }
-        else if( is_dir( argv[i] ) )
-            workdir = argv[i];
-        else
-            printf("Unrecognised command/is not a valid path: %s\nContinuing anyway.\n", argv[i]);
-    }
+    handleargs(argc, argv);
 
     if (!is_dir(workdir))
         errout("Failed to open given directory.");
