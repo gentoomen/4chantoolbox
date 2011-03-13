@@ -200,22 +200,24 @@ handle_match(fileLL *f, fileLL *fc) {
 
     printf( "MD5 match found! Would you like to delete duplicate file %s ?\n", fc->path );
 
-    /* Sanitary method of getting the user's choice */
-    do {
-        puts("(y)es / (n)o / the (o)ther file / (b)oth ?");
-        for (i = 0; i < INLIM && (c[i] = getchar()) != '\n'; i++);
-        if (c[i] != '\n')
-            while(getchar() != '\n');
-        c[i] = '\0';
+    if(ask) {
+        /* Sanitary method of getting the user's choice */
+        do {
+            puts("(y)es / (n)o / the (o)ther file / (b)oth ?");
+            for (i = 0; i < INLIM && (c[i] = getchar()) != '\n'; i++);
+            if (c[i] != '\n')
+                while(getchar() != '\n');
+            c[i] = '\0';
+        }
+        while (strcmp(c, "o") && strcmp(c, "other") && strcmp(c, "b") && strcmp(c, "both") && strcmp(c, "y") && strcmp(c, "yes") && strcmp(c, "n") && strcmp(c, "no"));
     }
-    while (strcmp(c, "o") && strcmp(c, "other") && strcmp(c, "b") && strcmp(c, "both") && strcmp(c, "y") && strcmp(c, "yes") && strcmp(c, "n") && strcmp(c, "no"));
 
     /* Conditions under which we delete the file f. More dangerous because we have to account for moving our pointers */
     if(!strcmp(c, "o") || !strcmp(c, "other") || !strcmp(c, "b") || !strcmp(c, "both" ))
         do_delete(f);
 
     /* Conditions under which we delete the later file */
-    if(!strcmp(c, "y") || !strcmp(c, "yes") || !strcmp(c, "b") || !strcmp(c, "both" ))
+    if(!ask || !strcmp(c, "y") || !strcmp(c, "yes") || !strcmp(c, "b") || !strcmp(c, "both" ))
         do_delete(fc);
 }
 
