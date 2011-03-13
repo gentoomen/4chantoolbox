@@ -7,12 +7,14 @@ Created by LAMMJohnson for the gentoomen 4chantoolbox project
 #include <stdlib.h>
 #include <string.h>
 #include <sys/dir.h>
+#include <sys/stat.h>
 
 typedef struct fileLL fileLL;
 struct fileLL {
     char* path;
     char* md5hash;
-    fileLL *next;
+    unsigned int size;
+    fileLL *next, *prev;
 };
 
 /* Globals */
@@ -33,10 +35,15 @@ void work_through_dir(char* path);
 
 void
 add_file_to_LL(char* path) {
-    fileLL* f = malloc(sizeof(fileLL));
+    fileLL* f;
+    struct stat st;
 
+    f = malloc(sizeof(fileLL));
     f->path = malloc((strlen(path) + 1) * sizeof(char));
     strcpy(f->path, path);
+
+    stat(path, &st);
+    f->size = st.st_size;
 
     if (!firstfile) {
         firstfile = f;
@@ -46,6 +53,31 @@ add_file_to_LL(char* path) {
         lastfile->next = f;
         lastfile = lastfile->next;
     }
+
+    lastfile->next = NULL;
+}
+
+void
+compare_files(void) {
+    fileLL *f, *fc;
+    f = firstfile;
+
+    if(!f)
+        errout("No files to compare!");
+
+    while(f) {
+        fc = f->next;
+        while(fc) {
+            if(f->size == fc->size)
+                /* At this point we're iterating through the linked list comparing every file to every other file. */
+                /* If we're in this loop we've found files of matching size. */
+                printf("Files %s and %s have matching sizes: %d and %d.\n", f->path, fc->path, f->size, fc->size);
+
+            fc = fc->next;
+        }
+        f = f->next;
+    }
+
 }
 
 void
@@ -148,10 +180,12 @@ int main(int argc, char** argv) {
 
     work_through_dir(workdir);
     
+    /* Shows all the files we have collected info about */
     fileLL *f;
     for(f = firstfile; f; f = f->next)
-        printf("FILE: %s\n", f->path);
+        printf("FILE: %s\nSIZE:%d\n\n", f->path, f->size);
 
+    compare_files();
 
     return 0;
 }
