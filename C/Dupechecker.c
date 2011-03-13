@@ -48,10 +48,12 @@ add_file_to_LL(char* path) {
     if (!firstfile) {
         firstfile = f;
         lastfile = firstfile;
+        firstfile->prev = NULL;
     }
     else {
         lastfile->next = f;
-        lastfile = lastfile->next;
+        f->prev = lastfile;
+        lastfile = f;
     }
 
     lastfile->next = NULL;
