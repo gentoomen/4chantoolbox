@@ -211,6 +211,8 @@ handle_match(fileLL *f, fileLL *fc) {
         }
         while (strcmp(c, "o") && strcmp(c, "other") && strcmp(c, "b") && strcmp(c, "both") && strcmp(c, "y") && strcmp(c, "yes") && strcmp(c, "n") && strcmp(c, "no"));
     }
+    else
+        c[0] = '\0';
 
     /* Conditions under which we delete the file f. More dangerous because we have to account for moving our pointers */
     if(!strcmp(c, "o") || !strcmp(c, "other") || !strcmp(c, "b") || !strcmp(c, "both" ))
