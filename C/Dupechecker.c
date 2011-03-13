@@ -108,7 +108,7 @@ compare_files(void) {
 
 void
 do_delete(fileLL *f) {
-    if (remove(f->path) == -1)
+    if (remove(f->path))
         printf("Error in deleting file %s !\n", f->path);
     else
         printf("File %s removed successfully.\n", f->path);
@@ -117,6 +117,7 @@ do_delete(fileLL *f) {
     if(currfile == f)
         currfile = currfile->next;
 
+    /* Close the gap in the LL */
     if (f->prev)
         f->prev->next = f->next;
     if (f->next)
@@ -297,51 +298,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-/*
-# get user input to determine if it's deleteion time or not
-def get_choice():
-    choose = ""
-    validOptions = ( 'y', 'n', 'o', 'b', 'yes', 'no', 'other', 'both')
-    while not choose in validOptions :
-    return choose
-
-def pretty_size(size):
-    suffixes = [("B",2**10), ("K",2**20), ("M",2**30), ("G",2**40), ("T",2**50)]
-    for suf, lim in suffixes:
-        if size > lim:
-            continue
-        else:
-            return round(size/float(lim/2**10),2).__str__()+suf
-
-def remfile(infile):
-    if os.path.isfile(infile.wholepath):
-        os.remove(infile.wholepath)
-        print infile.wholepath + " deleted."
-
-## Main part
-#Get a list of files only (no dirs)
-add_dir(directory)
-
-#to allow us to catch exceptions
-# The real meat of it -- compare listed files.
-for i in range(len(filestats)):
-    startfile = filestats[i]
-    # be careful to check we haven't deleted either the file in a previous action
-    if os.path.isfile(startfile.wholepath):
-
-        for e in range(i + 1, len(filestats)):
-            checkagainst = filestats[e]
-            # be careful to check we haven't deleted either the file in a previous action
-            if os.path.isfile(checkagainst.wholepath):
-
-                if startfile.size == checkagainst.size:
-                    showmatch(startfile, checkagainst)
-
-                    # Generate md5s if necessary
-                    for f in (startfile, checkagainst):
-                        if f.md5 == "":
-                            f.get_md5()
-                
-                    else:
-                        print "No md5 match."
-*/
