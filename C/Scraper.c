@@ -3,8 +3,9 @@
 #include <curl/curl.h>
 
 /* Globals */
-CURL *curl;
-CURLcode *res;
+CURL        *curl;
+CURLcode    res;
+char        *URL;
 
 /* Predecs */
 void errout(char* str);
@@ -24,6 +25,8 @@ handleargs(int argc, char** argv) {
     for (i = 0; i < argc; i++) {
         if (!strcmp(argv[i], "-h"))
             usage();
+        else
+            URL = argv[i];
     }
 }
 
@@ -44,10 +47,12 @@ int main(int argc, char** argv) {
         handleargs(argc, argv);
 
     if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
+        curl_easy_setopt(curl, CURLOPT_URL, URL);
+        res = curl_easy_perform(curl);
 
-        printf("Grabbing URL: %s\n", argv[1]);
+        printf("Grabbing URL: %s\n", URL);
 
+        curl_easy_cleanup(curl);
     }
 
     return 0;
