@@ -28,6 +28,7 @@ void errout(char* str);
 void get_image_links();
 void handleargs(int argc, char** argv);
 void handle_image_links(void);
+short is_match(long l);
 void usage(void);
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
 
@@ -35,12 +36,15 @@ static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *
 void
 add_image(long l) {
     imageLL *ill = malloc(sizeof(imageLL));
+    int sz;
 
-    if(!first) {
+    if(!first)
         curr = first = ill;
-    }
 
-    ill->url = "TESTTESTTEST";
+    for(sz = 0; URLdata.memory[sz + l] != '"'; sz++);
+    ill->url = malloc((sz + 1) * sizeof(char));
+    strncpy(ill->url, URLdata.memory + (l * sizeof(char)), sz);
+
     ill->next = NULL;
     curr->next = ill;
     curr = ill;
@@ -58,7 +62,7 @@ get_image_links(void) {
     long l;
 
     for (l = 0; l < URLdata.size; l++) {
-        if (URLdata.memory[l] == 'h'){
+        if (URLdata.memory[l] == 'h' && is_match(l)) {
             add_image(l);
         }
     }
@@ -85,6 +89,18 @@ handle_image_links(void) {
 
         ill = ill->next;
     } while (ill);
+}
+
+short
+is_match(long l) {
+    char* strtomatch = "http://images.4chan.org/";
+    int i, e = strlen(strtomatch);
+
+    for (i = 0; i < e; i++)
+        if (URLdata.memory[i + l] != strtomatch[i])
+            return 0;
+
+    return 1;
 }
 
 void
