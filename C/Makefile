@@ -1,6 +1,7 @@
-all: Dupechecker.c
+all: Dupechecker.c Scraper.c
 	gcc Dupechecker.c -o Dupechecker -lssl
-	chmod +x Dupechecker
+	gcc Scraper.c -o Scraper -lcurl
+	chmod +x Dupechecker Scraper
 
 clean:
-	rm Dupechecker
+	rm Dupechecker Scraper
