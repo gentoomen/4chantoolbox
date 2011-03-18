@@ -114,8 +114,7 @@ usage(void) {
 }
 
 static size_t
-write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data)
-{
+write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)data;
  
@@ -133,7 +132,9 @@ write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data)
   return realsize;
 }
 
-int main(int argc, char** argv) {
+int
+main(int argc, char** argv)
+{
     curl_handle = curl_easy_init();
 
     if(argc < 2) {
