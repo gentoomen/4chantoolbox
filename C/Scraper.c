@@ -60,10 +60,14 @@ errout(char* str) {
 void
 get_image_links(void) {
     long l;
+    int linksgrabbed = 0;       /* This is a horrible hack. Each image is listed twice so we only take every other one. */
 
     for (l = 0; l < URLdata.size; l++) {
         if (URLdata.memory[l] == 'h' && is_match(l)) {
-            add_image(l);
+            /* Hackish. Horrible. */
+            if(linksgrabbed % 2)
+                add_image(l);
+            linksgrabbed++;
         }
     }
 }
