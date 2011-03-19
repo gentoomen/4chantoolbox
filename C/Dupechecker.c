@@ -1,6 +1,7 @@
 /*
-Finds duplicate files based on md5 and filesize
-Created by LAMMJohnson for the gentoomen 4chantoolbox project
+    Finds duplicate files based on md5 and filesize
+    Created by LAMMJohnson for the gentoomen 4chantoolbox project
+    Licensed under the GPLv3
 */
 
 #include <fcntl.h>
