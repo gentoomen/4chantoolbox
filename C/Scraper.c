@@ -27,6 +27,7 @@ void add_image(long l);
 void errout(char* str);
 short file_exists(char* path);
 char* fn_from_url(char* url);
+void free_imageLL(imageLL* ill);
 void get_image_links();
 void handleargs(int argc, char** argv);
 void handle_image_links(void);
@@ -86,6 +87,12 @@ fn_from_url(char* url) {
 }
 
 void
+free_imageLL(imageLL* ill) {
+    free(ill->url);
+    free(ill);
+}
+
+void
 get_image_links(void) {
     long l;
     int linksgrabbed = 0;       /* This is a horrible hack. Each image is listed twice so we only take every other one. */
@@ -113,7 +120,7 @@ handleargs(int argc, char** argv) {
 
 void
 handle_image_links(void) {
-    imageLL *ill;
+    imageLL *ill, *ill_old;
     char* filename;
 
     ill = first;
@@ -125,7 +132,10 @@ handle_image_links(void) {
         else
             retrieve_file(ill->url, filename);
 
+        ill_old = ill;
         ill = ill->next;
+        free(filename);
+        free_imageLL(ill_old);
     } while (ill);
 }
 
