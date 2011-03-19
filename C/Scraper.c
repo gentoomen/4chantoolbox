@@ -25,6 +25,7 @@ imageLL                 *first = NULL, *curr;
 /* Predecs */
 void add_image(long l);
 void errout(char* str);
+short file_exists(char* path);
 void get_image_links();
 void handleargs(int argc, char** argv);
 void handle_image_links(void);
@@ -57,6 +58,18 @@ errout(char* str) {
     exit(0);
 }
 
+short
+file_exists(char* path) {
+    FILE *f = fopen(path, "r");
+
+    if (f) {
+        fclose(f);
+        return 1;
+    }
+
+    return 0;
+}
+
 void
 get_image_links(void) {
     long l;
@@ -86,10 +99,11 @@ handleargs(int argc, char** argv) {
 void
 handle_image_links(void) {
     imageLL *ill;
+    char* filename = "TESTTESTTEST";
 
     ill = first;
     do {
-        printf("PROCESSING LINK: %s\n", ill->url);
+        printf("PROCESSING LINK: %s as %s\n", ill->url, filename);
 
         ill = ill->next;
     } while (ill);
@@ -157,6 +171,7 @@ main(int argc, char** argv)
             /* printf("Data:\n%s", URLdata.memory); */
 
             get_image_links();
+            free(URLdata.memory);
             handle_image_links();
 
             curl_easy_cleanup(curl_handle);
