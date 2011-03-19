@@ -1,3 +1,9 @@
+/*
+    Written by LAMMJohnson
+    For the 4chantoolbox project
+    Licensed under the GPLv3
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -175,7 +181,16 @@ retrieve_file(char* url, char* path) {
 
 void
 usage(void) {
-    puts("Usage information here.");
+    puts("==================================================");
+    puts("Usage: Scraper [OPTION] <thread url>");
+    puts("Default OPTIONS: --output ./ --thread 10");
+    puts("Scraper for 4chan, part of 4chantoolbox.");
+    puts("");
+    puts(" -o/--output set output dir");
+    puts(" -q/--quiet go silent");
+    puts(" -t/--timer N thread refresh timer");
+    puts(" -h/--help this message");
+    puts("==================================================");
     exit(0);
 }
 
