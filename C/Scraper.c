@@ -118,7 +118,11 @@ handle_image_links(void) {
     ill = first;
     do {
         filename = fn_from_url(ill->url);
-        printf("PROCESSING LINK: %s as %s\n", ill->url, filename);
+
+        if (file_exists(filename))
+            printf("File exists: %s -- SKIPPING\n", filename);
+        else
+            printf("PROCESSING LINK: %s as %s\n", ill->url, filename);
 
         ill = ill->next;
     } while (ill);
