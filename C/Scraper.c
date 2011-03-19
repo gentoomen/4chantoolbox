@@ -26,6 +26,7 @@ imageLL                 *first = NULL, *curr;
 void add_image(long l);
 void errout(char* str);
 short file_exists(char* path);
+char* fn_from_url(char* url);
 void get_image_links();
 void handleargs(int argc, char** argv);
 void handle_image_links(void);
@@ -70,6 +71,19 @@ file_exists(char* path) {
     return 0;
 }
 
+char*
+fn_from_url(char* url) {
+    char* name;
+    int i, len;
+
+    for (i = len = strlen(url); url[i] != '/'; i--);
+
+    name = malloc((len - i) * sizeof(char));
+    strncpy(name, url + i + 1, len - i);
+
+    return name;
+}
+
 void
 get_image_links(void) {
     long l;
@@ -99,10 +113,11 @@ handleargs(int argc, char** argv) {
 void
 handle_image_links(void) {
     imageLL *ill;
-    char* filename = "TESTTESTTEST";
+    char* filename;
 
     ill = first;
     do {
+        filename = fn_from_url(ill->url);
         printf("PROCESSING LINK: %s as %s\n", ill->url, filename);
 
         ill = ill->next;
@@ -112,9 +127,9 @@ handle_image_links(void) {
 short
 is_match(long l) {
     char* strtomatch = "http://images.4chan.org/";
-    int i, e = strlen(strtomatch);
+    int i, lim = strlen(strtomatch);
 
-    for (i = 0; i < e; i++)
+    for (i = 0; i < lim; i++)
         if (URLdata.memory[i + l] != strtomatch[i])
             return 0;
 
