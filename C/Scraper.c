@@ -31,6 +31,7 @@ void get_image_links();
 void handleargs(int argc, char** argv);
 void handle_image_links(void);
 short is_match(long l);
+void retrieve_file(char* url, char* path);
 void usage(void);
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
 
@@ -122,7 +123,7 @@ handle_image_links(void) {
         if (file_exists(filename))
             printf("File exists: %s -- SKIPPING\n", filename);
         else
-            printf("PROCESSING LINK: %s as %s\n", ill->url, filename);
+            retrieve_file(ill->url, filename);
 
         ill = ill->next;
     } while (ill);
@@ -138,6 +139,28 @@ is_match(long l) {
             return 0;
 
     return 1;
+}
+
+void
+retrieve_file(char* url, char* path) {
+    CURL *fcurl;
+    FILE *f;
+
+    printf("Downloading file: %s\n", path);
+
+    fcurl = curl_easy_init();
+    if (fcurl) {
+        f = fopen(path, "w");
+        curl_easy_setopt(fcurl, CURLOPT_URL, url);
+        curl_easy_setopt(fcurl, CURLOPT_WRITEDATA, f); 
+        curl_easy_perform(fcurl);
+        curl_easy_cleanup(fcurl);
+        fclose(f);
+        printf("%s downloaded successfully.\n", path);
+    }
+    else
+        printf("Error with libcurl downloading file: %s\nTo Path: %s\n", url, path);
+
 }
 
 void
@@ -191,9 +214,9 @@ main(int argc, char** argv)
 
             get_image_links();
             free(URLdata.memory);
-            handle_image_links();
-
             curl_easy_cleanup(curl_handle);
+
+            handle_image_links();
         }
         else
             errout("Unable to grab URL.");
