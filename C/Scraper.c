@@ -48,6 +48,7 @@ void handleargs(int argc, char** argv);
 void handle_image_links(void);
 short is_dir(char* path);
 short is_match(long l);
+void populate_imageLL(imageLL* ill);
 void retrieve_file(char* url, char* path);
 void sanitise_outdir(void);
 void usage(void);
@@ -65,12 +66,6 @@ add_image(long l) {
     for(sz = 0; URLdata.memory[sz + l] != '"'; sz++);
     ill->url = malloc((sz + 1) * sizeof(char));
     strncpy(ill->url, URLdata.memory + (l * sizeof(char)), sz);
-
-    ill->filename = fn_from_url(ill->url);
-
-    ill->fullpath = malloc((strlen(outdir) + strlen(ill->filename)) * sizeof(char));
-    strcpy(ill->fullpath, outdir);
-    strcat(ill->fullpath, ill->filename);
 
     ill->next = NULL;
     curr->next = ill;
@@ -157,7 +152,8 @@ handle_image_links(void) {
     imageLL *ill, *ill_old;
 
     ill = first;
-    do {
+    while (ill) {
+        populate_imageLL(ill);
 
         if (file_exists(ill->fullpath))
             printf("File exists: %s -- SKIPPING\n", ill->filename);
@@ -167,7 +163,7 @@ handle_image_links(void) {
         ill_old = ill;
         ill = ill->next;
         free_imageLL(ill_old);
-    } while (ill);
+    }
 }
 
 short
@@ -195,11 +191,20 @@ is_match(long l) {
 }
 
 void
+populate_imageLL(imageLL *ill) {
+    ill->filename = fn_from_url(ill->url);
+
+    ill->fullpath = malloc((strlen(outdir) + strlen(ill->filename)) * sizeof(char));
+    strcpy(ill->fullpath, outdir);
+    strcat(ill->fullpath, ill->filename);
+}
+
+void
 retrieve_file(char* url, char* path) {
     CURL *fcurl;
     FILE *f;
 
-    printf("Downloading file: %s\n", path);
+    printf("Downloading file: %s", path);
 
     fcurl = curl_easy_init();
     if (fcurl) {
@@ -210,7 +215,7 @@ retrieve_file(char* url, char* path) {
         curl_easy_cleanup(fcurl);
         fclose(f);
 
-        printf("%s downloaded successfully.\n", path);
+        puts(" -- downloaded successfully.");
     }
     else
         printf("Error with libcurl downloading file: %s\nTo Path: %s\n", url, path);
