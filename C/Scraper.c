@@ -27,6 +27,12 @@ CURLcode                res;
 char                    *URL;
 struct MemoryStruct     URLdata;
 imageLL                 *first = NULL, *curr;
+unsigned int            downtot;
+
+/* Default Dettings */
+short                   verbose = 1;
+char*                   outdir = "./";
+short                   refresh = 10;
 
 /* Predecs */
 void add_image(long l);
@@ -161,17 +167,25 @@ void
 retrieve_file(char* url, char* path) {
     CURL *fcurl;
     FILE *f;
+    char *fullpath;
 
     printf("Downloading file: %s\n", path);
 
     fcurl = curl_easy_init();
     if (fcurl) {
-        f = fopen(path, "w");
+        fullpath = malloc((strlen(outdir) + strlen(path) + 1) * sizeof(char));
+        strcpy(fullpath, outdir);
+        strcat(fullpath, path);
+
+        f = fopen(fullpath, "w");
         curl_easy_setopt(fcurl, CURLOPT_URL, url);
         curl_easy_setopt(fcurl, CURLOPT_WRITEDATA, f); 
         curl_easy_perform(fcurl);
         curl_easy_cleanup(fcurl);
         fclose(f);
+
+        free(fullpath);
+
         printf("%s downloaded successfully.\n", path);
     }
     else
