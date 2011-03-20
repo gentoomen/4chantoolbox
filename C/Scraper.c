@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
+#include <sys/dir.h>
 
 /* Datatypes */
 struct MemoryStruct {
@@ -43,8 +44,10 @@ void free_imageLL(imageLL* ill);
 void get_image_links();
 void handleargs(int argc, char** argv);
 void handle_image_links(void);
+short is_dir(char* path);
 short is_match(long l);
 void retrieve_file(char* url, char* path);
+void sanitise_outdir(void);
 void usage(void);
 static size_t write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data);
 
@@ -75,14 +78,22 @@ errout(char* str) {
 
 short
 file_exists(char* path) {
-    FILE *f = fopen(path, "r");
+    FILE *f;
+    char *fullpath;
+    short ret = 0;
 
+    fullpath = malloc((strlen(outdir) + strlen(path)) * sizeof(char));
+    strcpy(fullpath, outdir);
+    strcat(fullpath, path);
+
+    f = fopen(fullpath, "r");
     if (f) {
         fclose(f);
-        return 1;
+        ret = 1;
     }
 
-    return 0;
+    free(fullpath);
+    return ret;
 }
 
 char*
@@ -125,9 +136,14 @@ handleargs(int argc, char** argv) {
     for (i = 0; i < argc; i++) {
         if (!strcmp(argv[i], "-h"))
             usage();
+        else if (!strcmp(argv[i], "-o") || !strcmp(argv[i], "--output")) {
+            if (++i < argc)
+                outdir = argv[i];
+        }
         else
             URL = argv[i];
     }
+
 }
 
 void
@@ -149,6 +165,18 @@ handle_image_links(void) {
         free(filename);
         free_imageLL(ill_old);
     } while (ill);
+}
+
+short
+is_dir(char* path) {
+    DIR *dir = opendir(path);
+    int ret = 0;
+
+    if (dir)
+        ret = 1;
+
+    closedir(dir);
+    return ret;
 }
 
 short
@@ -191,6 +219,21 @@ retrieve_file(char* url, char* path) {
     else
         printf("Error with libcurl downloading file: %s\nTo Path: %s\n", url, path);
 
+}
+
+void
+sanitise_outdir(void) {
+    int len = strlen(outdir);
+    char* s;
+
+    if(outdir[len - 1] == '/')
+        return;
+
+    s = malloc((len + 2) * sizeof(char));
+    strcpy(s, outdir);
+    strcat(s, "/");
+    /* free(outdir); */
+    outdir = s;
 }
 
 void
@@ -238,6 +281,13 @@ main(int argc, char** argv)
     }
     else
         handleargs(argc, argv);
+
+    sanitise_outdir();
+    if(!is_dir(outdir)) {
+        printf("Invalid directory for output (dir does not exist): %s", outdir);
+        errout(NULL);
+    }
+
 
     if(curl_handle) {
         curl_easy_setopt(curl_handle, CURLOPT_URL, URL);
