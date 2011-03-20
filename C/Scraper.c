@@ -19,6 +19,8 @@ struct MemoryStruct {
 typedef struct imageLL imageLL;
 struct imageLL {
     char        *url;
+    char        *filename;
+    char        *fullpath;
     imageLL     *next;
 };
 
@@ -64,6 +66,12 @@ add_image(long l) {
     ill->url = malloc((sz + 1) * sizeof(char));
     strncpy(ill->url, URLdata.memory + (l * sizeof(char)), sz);
 
+    ill->filename = fn_from_url(ill->url);
+
+    ill->fullpath = malloc((strlen(outdir) + strlen(ill->filename)) * sizeof(char));
+    strcpy(ill->fullpath, outdir);
+    strcat(ill->fullpath, ill->filename);
+
     ill->next = NULL;
     curr->next = ill;
     curr = ill;
@@ -79,20 +87,14 @@ errout(char* str) {
 short
 file_exists(char* path) {
     FILE *f;
-    char *fullpath;
     short ret = 0;
 
-    fullpath = malloc((strlen(outdir) + strlen(path)) * sizeof(char));
-    strcpy(fullpath, outdir);
-    strcat(fullpath, path);
-
-    f = fopen(fullpath, "r");
+    f = fopen(path, "r");
     if (f) {
         fclose(f);
         ret = 1;
     }
 
-    free(fullpath);
     return ret;
 }
 
@@ -111,8 +113,12 @@ fn_from_url(char* url) {
 
 void
 free_imageLL(imageLL* ill) {
-    free(ill->url);
-    free(ill);
+    if(ill) {
+        if(ill->url)        free(ill->url);
+        if(ill->filename)   free(ill->filename);
+        if(ill->fullpath)   free(ill->fullpath);
+        free(ill);
+    }
 }
 
 void
@@ -149,20 +155,17 @@ handleargs(int argc, char** argv) {
 void
 handle_image_links(void) {
     imageLL *ill, *ill_old;
-    char* filename;
 
     ill = first;
     do {
-        filename = fn_from_url(ill->url);
 
-        if (file_exists(filename))
-            printf("File exists: %s -- SKIPPING\n", filename);
+        if (file_exists(ill->fullpath))
+            printf("File exists: %s -- SKIPPING\n", ill->filename);
         else
-            retrieve_file(ill->url, filename);
+            retrieve_file(ill->url, ill->fullpath);
 
         ill_old = ill;
         ill = ill->next;
-        free(filename);
         free_imageLL(ill_old);
     } while (ill);
 }
@@ -195,24 +198,17 @@ void
 retrieve_file(char* url, char* path) {
     CURL *fcurl;
     FILE *f;
-    char *fullpath;
 
     printf("Downloading file: %s\n", path);
 
     fcurl = curl_easy_init();
     if (fcurl) {
-        fullpath = malloc((strlen(outdir) + strlen(path) + 1) * sizeof(char));
-        strcpy(fullpath, outdir);
-        strcat(fullpath, path);
-
-        f = fopen(fullpath, "w");
+        f = fopen(path, "w");
         curl_easy_setopt(fcurl, CURLOPT_URL, url);
         curl_easy_setopt(fcurl, CURLOPT_WRITEDATA, f); 
         curl_easy_perform(fcurl);
         curl_easy_cleanup(fcurl);
         fclose(f);
-
-        free(fullpath);
 
         printf("%s downloaded successfully.\n", path);
     }
