@@ -155,7 +155,8 @@ handle_image_links(void) {
     while (ill) {
         populate_imageLL(ill);
 
-        printf("File: %s\n", ill->filename);
+        printf("File: %s ", ill->filename);
+        fflush(stdout);
 
         if (file_exists(ill->fullpath))
             puts("-- file exists. Download skipped.");
@@ -273,8 +274,6 @@ write_memory_callback(void *ptr, size_t size, size_t nmemb, void *data) {
 int
 main(int argc, char** argv)
 {
-    curl_handle = curl_easy_init();
-
     if(argc < 2) {
         puts("Not enough arguments given.");
         usage();
@@ -288,7 +287,7 @@ main(int argc, char** argv)
         errout(NULL);
     }
 
-
+    curl_handle = curl_easy_init();
     if(curl_handle) {
         curl_easy_setopt(curl_handle, CURLOPT_URL, URL);
         curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
