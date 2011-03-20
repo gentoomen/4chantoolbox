@@ -155,8 +155,10 @@ handle_image_links(void) {
     while (ill) {
         populate_imageLL(ill);
 
+        printf("File: %s\n", ill->filename);
+
         if (file_exists(ill->fullpath))
-            printf("File exists: %s -- SKIPPING\n", ill->filename);
+            puts("-- file exists. Download skipped.");
         else
             retrieve_file(ill->url, ill->fullpath);
 
@@ -204,8 +206,6 @@ retrieve_file(char* url, char* path) {
     CURL *fcurl;
     FILE *f;
 
-    printf("Downloading file: %s", path);
-
     fcurl = curl_easy_init();
     if (fcurl) {
         f = fopen(path, "w");
@@ -215,11 +215,10 @@ retrieve_file(char* url, char* path) {
         curl_easy_cleanup(fcurl);
         fclose(f);
 
-        puts(" -- downloaded successfully.");
+        puts("-- downloaded successfully.");
     }
     else
-        printf("Error with libcurl downloading file: %s\nTo Path: %s\n", url, path);
-
+        printf(" -- Error with libcurl downloading file: %s\nTo Path: %s\n", url, path);
 }
 
 void
