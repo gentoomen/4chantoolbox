@@ -41,7 +41,7 @@ void do_delete(fileLL *f);
 void errout(char* str);
 void free_fileLL(fileLL *f);
 char* get_full_path(char* path, char* forf);
-char* get_hash(fileLL *f);
+unsigned char* get_hash(fileLL *f);
 void handleargs(int argc, char** argv);
 void handle_match(fileLL *f, fileLL *fc);
 int is_dir(char* path);
@@ -163,7 +163,7 @@ get_full_path(char* path, char* forf) {
     return c;
 }
 
-char*
+unsigned char*
 get_hash(fileLL *f) {
     unsigned char *c;
     char *file_buffer;
