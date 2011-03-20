@@ -26,7 +26,6 @@ struct imageLL {
 
 /* Globals */
 CURL                    *curl_handle;
-CURLcode                res;
 char                    *URL;
 struct MemoryStruct     URLdata;
 imageLL                 *first = NULL, *curr;
@@ -287,28 +286,31 @@ main(int argc, char** argv)
         errout(NULL);
     }
 
-    curl_handle = curl_easy_init();
-    if(curl_handle) {
-        curl_easy_setopt(curl_handle, CURLOPT_URL, URL);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*) &URLdata);
-        curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "Firefox/3.6.15");
+    /* while(1) { */
+        curl_handle = curl_easy_init();
+        if(curl_handle) {
+            curl_easy_setopt(curl_handle, CURLOPT_URL, URL);
+            curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory_callback);
+            curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*) &URLdata);
+            curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "Firefox/3.6.15");
 
-        curl_easy_perform(curl_handle);
+            curl_easy_perform(curl_handle);
 
-        if(URLdata.memory) {
-            printf("Grabbed URL: %s\n", URL);
-            /* printf("Data:\n%s", URLdata.memory); */
+            if(URLdata.memory) {
+                printf("Grabbed URL: %s\n", URL);
+                /* printf("Data:\n%s", URLdata.memory); */
 
-            get_image_links();
-            free(URLdata.memory);
-            curl_easy_cleanup(curl_handle);
+                get_image_links();
+                free(URLdata.memory);
+                URLdata.size = 0;
+                curl_easy_cleanup(curl_handle);
 
-            handle_image_links();
+                handle_image_links();
+            }
+            else
+                errout("Unable to grab URL.");
         }
-        else
-            errout("Unable to grab URL.");
-    }
+    /* } */
 
     curl_global_cleanup();
 
