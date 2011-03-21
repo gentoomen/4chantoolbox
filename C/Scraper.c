@@ -3,6 +3,7 @@
     For the 4chantoolbox project
     Licensed under the GPLv3
 */
+/* */
 
 #include <stdio.h>
 #include <stdlib.h>
