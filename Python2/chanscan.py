@@ -44,11 +44,12 @@ OUTCANDM = "-m" # Output both the number of matches and the containing text.
 print_lock = threading.Lock()
 
 class Scanner(threading.Thread):
-    def __init__(self, url, keywords, switches):
+    def __init__(self, url, board, keywords, switches):
         threading.Thread.__init__(self)
         self.url = url
         self.keywords = keywords
         self.cmd = switches
+        self.board = board
 
     def run(self):
         list_threads = find_threads(self.url)
@@ -60,7 +61,7 @@ class Scanner(threading.Thread):
             print("Could not access {0}.\nQuitting.".format(self.url))
             sys.exit(1)
         for thread in list_threads:
-            url = BASE_URL + board + thread
+            url = BASE_URL + self.board + thread
             try: page_data = urllib.urlopen(url).read()
             except IOError:
                 print("Could not read {0}".format(url))
@@ -106,7 +107,7 @@ class Scanner(threading.Thread):
                     print("{0} results for {1} in {2}.".format(
                         len(matches[key]),
                         key,
-                        thread)
+                        thread))
                     for i in matches[key]:
                         print(i)
                     print("")
@@ -114,11 +115,11 @@ class Scanner(threading.Thread):
                     print("{0} results for {1} in {2}.".format(
                         len(matches[key]),
                         key,
-                        thread)
+                        thread))
                     print("")
                 else:
                     print("Matches for {0}:".format(key))
-                    for i in matches(key):
+                    for i in matches[key]:
                         print(i)
                     print("")
 
@@ -244,4 +245,7 @@ def main():
     if option.match_both != 0:
         switches += OUTCANDM
     for i in pages:
-        Scanner(i, keywords, switches).start()
+        Scanner(i, board, keywords, switches).start()
+
+if __name__ == "__main__":
+    main()
