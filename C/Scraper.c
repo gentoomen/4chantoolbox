@@ -186,6 +186,9 @@ is_match(long l) {
     char* strtomatch = "http://images.4chan.org/";
     int i, lim = strlen(strtomatch);
 
+    if (l + lim > strlen(URLdata.memory))
+        return 0;
+
     for (i = 0; i < lim; i++)
         if (URLdata.memory[i + l] != strtomatch[i])
             return 0;
