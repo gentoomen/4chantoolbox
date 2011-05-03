@@ -108,6 +108,10 @@ compare_files(void) {
                 }
             }
             fc = fc->next;
+
+            /* Deletion of both files can cause currfile and fc to be the same. This makes sure that never happens. */
+            if (fc == currfile)
+                fc = fc->next;
         }
         if (verbose && !match)
             printf("======== No matches found for file %s\n", currfile->path);
