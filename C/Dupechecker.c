@@ -57,6 +57,8 @@ add_file_to_LL(char* path) {
     struct stat st;
 
     f = malloc(sizeof(fileLL));
+    if (!f)
+        errout("Failed to malloc for fileLL in add_file_to_LL.");
     f->path = malloc((strlen(path) + 1) * sizeof(char));
     strcpy(f->path, path);
 
@@ -159,6 +161,10 @@ free_fileLL(fileLL *f) {
 char*
 get_full_path(char* path, char* forf) {
     char* c = malloc( (strlen(path) + strlen(forf) + 2) * sizeof(char) );
+
+    if (!c)
+        errout("Failed to malloc c in get_full_path");
+
     c[0] = '\0';
     strcat(c, path);
     strcat(c, forf);
@@ -177,6 +183,9 @@ get_hash(fileLL *f) {
         printf("======== Getting hash for %s\n", f->path);
 
     c = malloc((MD5_DIGEST_LENGTH + 1) * sizeof(char));
+    if (!c)
+        errout("Failed to malloc c in get_hash");
+
     c[MD5_DIGEST_LENGTH] = '\0';
 
     file_descript = open(f->path, O_RDONLY);
@@ -279,6 +288,8 @@ pretty_size(unsigned long in) {
     sprintf(buf, "%.*f %s", i, size, units[i]);
 
     final = malloc((strlen(buf) + 2) * sizeof(char));
+    if (!final)
+        errout("Failed to malloc final in pretty_size");
     strcpy(final, buf);
     return final;
 }
