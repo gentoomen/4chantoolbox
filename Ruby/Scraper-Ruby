@@ -82,12 +82,8 @@ loop do
         html = open(@url);
         v_print("Page " + @url + " downloaded. Processing images.")
         
-        # Ruby's matchdata stuff doesn't show all occurrences of that pattern, just the first one.
-        # Until I can recall what the correct way to do that is, here's a temporary fix:
-        images = []
-        html.read.gsub!(/http:\/\/images\.4chan\.org\/[a-zA-Z0-9]{1,4}\/src\/\d+\.(?:png|gif|jpg)/) do |image|
-            images << image
-        end
+        # Grab all image links/paths/...
+        images = html.read.scan(/http:\/\/images\.4chan\.org\/\w+\/src\/\d+\.(?:png|gif|jpg)/)
         
         images.to_a.each do |image|
             # Split the image name from the URL and get a full path to write to
