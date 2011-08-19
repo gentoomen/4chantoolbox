@@ -84,11 +84,11 @@ while 1:
             # Split the image name from the URL and get a full path to write to
             imagename = re.search('src/(.*$)', image)
             imagename = imagename.group(1)
-            fullpath = output + imagename
+            fullpath = os.path.join(output, imagename)
 
             # Get the file if necessary
             if os.path.exists(fullpath):
-                v_print("File \'" + fullpath + "' exists. Skipping.")
+                v_print("File " + fullpath + "' exists. Skipping.")
             else:
                 v_print("Getting " + image)
                 u = urllib.urlopen(image)
