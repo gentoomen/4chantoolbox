@@ -8,8 +8,8 @@ import sys, getopt, os, hashlib
 ## Defaults
 recursive   = False       #defaults to not recursive
 directory   = "./"        #default is current dir
-ask         = False	  #defaults to requiring confirmation
-defChoice   = 'yes'	  #used when ask is False
+ask         = True	      #defaults to requiring confirmation
+defChoice   = 'yes'	      #used when ask is False
 dummy       = False
 
 # All important list of files
