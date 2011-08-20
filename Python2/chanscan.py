@@ -13,7 +13,7 @@ Contact me: irc.rizon.net\n
 Created on: April 14th 2011\n
 Version no: 0.2\n
 \n
-run this program with `python {0} <options> <arguements>`\n
+run this program with `python {0} <options> <arguments>`\n
 Options include:\n
 >> Specifications <<\n
 These two pieces of information must both be given a value.\n

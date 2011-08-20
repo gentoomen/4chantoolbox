@@ -8,7 +8,8 @@ import sys, getopt, os, hashlib
 ## Defaults
 recursive   = False       #defaults to not recursive
 directory   = "./"        #default is current dir
-ask         = True        #defaults to requiring confirmation
+ask         = True	      #defaults to requiring confirmation
+defChoice   = 'yes'	      #used when ask is False
 dummy       = False
 
 # All important list of files
@@ -32,7 +33,7 @@ def add_dir(dirpath):
         elif os.path.isfile(dirpath + tempfile):
             filestats.append( fileblock( dirpath + tempfile ) )
 
-# get user input to determine if it's deleteion time or not
+# get user input to determine if it's deletion time or not
 def get_choice():
     choose = ""
     validOptions = ( 'y', 'n', 'o', 'b', 'yes', 'no', 'other', 'both')
@@ -104,13 +105,12 @@ for o, a in opts:
     elif o in ("-h", "--help"):
         usage()
 
-# Spit out a warnign if we're using the current dir
+# Spit out a warning if we're using the current dir
 if directory == "./":
     print "No valid directory given. Using current directory."
 
 # If the dir doesn't end with a "/" we need to add one
-if not directory[ len(directory) - 1 ] == "/":
-    directory = directory + "/"
+directory = os.path.join(directory, '')
 
 ## Main part
 #Get a list of files only (no dirs)
@@ -146,6 +146,8 @@ for i in range(len(filestats)):
                             # Allowance for the automatic overwrite flag
                             if ask:
                                 choice = get_choice()
+                            else:
+				                choice = defChoice
 
                             # In instructed to, delete the file    
                             if choice in ('o', 'other', 'b', 'both'):
