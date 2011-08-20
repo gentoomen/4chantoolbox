@@ -146,8 +146,8 @@ for i in range(len(filestats)):
                             # Allowance for the automatic overwrite flag
                             if ask:
                                 choice = get_choice()
-			    else:
-				choice = defChoice
+                            else:
+				                choice = defChoice
 
                             # In instructed to, delete the file    
                             if choice in ('o', 'other', 'b', 'both'):
