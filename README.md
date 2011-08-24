@@ -10,13 +10,15 @@ contain stuff related to 4chan and/or /g/.
 The structure of this repo should stay like this:
 
 - a directory with the name of a programming language (e.g. `python/`, `ruby/`, ...)
-  - a bunch of scripts (see next paragraph)
-  - a custom `LICENCE` file (optional - we're using GPLv3 by default on all projects (read the `NOTE` inside `LICENCE`))
+  - a bunch of scripts (see next section)
+  - a custom `LICENCE` file (optional - we're using GPLv3 by default on all projects
+    (read the NOTE inside `LICENCE`))
 - and `README.md` and `LICENCE`
 
 The language-folders should contain the approved scripts, which are (at the moment):
 
-- the Dupechecker - which checks for duplicate files in a folder by calculating MD5 hashes and stuff and,
+- the Dupechecker - which checks for duplicate files in a folder by calculating MD5
+hashes and stuff and,
 - the Scraper - which downloads images from any 4chan thread 
 
 Those scripts should work pretty much the same way in every language - the main idea
