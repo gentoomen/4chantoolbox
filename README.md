@@ -28,4 +28,4 @@ the 4chantoolbox-guidelines it'll get merged in.
 
 ## Other notes:
 
->mfw the old blank README file was the only agaric commit left in this repo :/
+\>mfw the old, blank README file was the only commit by agaric left in this repo :/
