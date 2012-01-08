@@ -17,13 +17,13 @@
 -- Note: To run this you will obviously need the relevant packages from hackage
 -- or your distro.
 
-import List
+import Data.List
 import System.IO
 import Network.Curl
 import Network.Curl.Easy
 import Text.Regex.TDFA
 import Text.Printf
-import System ( getArgs )
+import System.Environment ( getArgs )
 
 
 getImage s = do
@@ -41,4 +41,5 @@ main = withCurlDo $ do
     curl <- initialize
     bodyText <- curlGetString (last args) []
     let images = nub $ (show bodyText =~ "http://images.4chan.org/[A-Za-z0-9]+/src/[0-9]{13}.[A-Za-z0-9]+")::[[String]]
+    printf "Page retrieved. %d images found.\n" (length images)
     mapM_ getImage (concat images)
