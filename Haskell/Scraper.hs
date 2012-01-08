@@ -24,12 +24,17 @@ import Network.Curl.Easy
 import Text.Regex.TDFA
 import System.Environment ( getArgs )
 
+writeToFile handle string = do
+    hPutStr handle string
+
 getImage s = do
+    curl <- initialize
     putStr $ "Getting image: " ++ show s
     outFile <- openFile (filePath s) WriteMode
+    setopt curl (CurlWriteFunction $ easyWriter (writeToFile outFile) )
+    setopt curl (CurlURL s)
     hSetBinaryMode outFile True
-    (_, imageStr) <- curlGetString s []
-    hPutStr outFile imageStr
+    perform curl
     hClose outFile
     putStr " ... Done!\n"
   where
