@@ -23,8 +23,8 @@ import Network.Curl
 import Network.Curl.Easy
 import Text.Regex.TDFA
 import Text.Printf
+import System ( getArgs )
 
-filePath s = s =~ "[0-9]{13}.[A-Za-z0-9]+"
 
 getImage s = do
     printf "Getting image: %s " s
@@ -33,9 +33,12 @@ getImage s = do
     (_, imageStr) <- curlGetString s []
     hPutStr outFile imageStr
     printf " ... Done!\n"
+  where
+    filePath s = s =~ "[0-9]{13}.[A-Za-z0-9]+"
 
 main = withCurlDo $ do
+    args <- getArgs
     curl <- initialize
-    bodyText <- curlGetString "http://boards.4chan.org/g/" []
+    bodyText <- curlGetString (last args) []
     let images = nub $ (show bodyText =~ "http://images.4chan.org/[A-Za-z0-9]+/src/[0-9]{13}.[A-Za-z0-9]+")::[[String]]
     mapM_ getImage (concat images)
