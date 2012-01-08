@@ -26,7 +26,7 @@ import System.Environment ( getArgs )
 
 
 getImage s = do
-    putStr $ "Getting image: " ++ show s ++ "\n"
+    putStr $ "Getting image: " ++ show s
     outFile <- openFile (filePath s) WriteMode
     hSetBinaryMode outFile True
     (_, imageStr) <- curlGetString s []
