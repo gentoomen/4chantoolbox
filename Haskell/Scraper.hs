@@ -24,13 +24,13 @@ import Network.Curl.Easy
 import Text.Regex.TDFA
 import System.Environment ( getArgs )
 
-
 getImage s = do
     putStr $ "Getting image: " ++ show s
     outFile <- openFile (filePath s) WriteMode
     hSetBinaryMode outFile True
     (_, imageStr) <- curlGetString s []
     hPutStr outFile imageStr
+    hClose outFile
     putStr " ... Done!\n"
   where
     filePath s = s =~ "[0-9]{13}.[A-Za-z0-9]+"
