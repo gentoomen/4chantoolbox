@@ -17,22 +17,21 @@
 -- Note: To run this you will obviously need the relevant packages from hackage
 -- or your distro.
 
-import Data.List
+import Data.List ( nub )
 import System.IO
 import Network.Curl
 import Network.Curl.Easy
 import Text.Regex.TDFA
-import Text.Printf
 import System.Environment ( getArgs )
 
 
 getImage s = do
-    printf "Getting image: %s " s
+    putStr $ "Getting image: " ++ show s ++ "\n"
     outFile <- openFile (filePath s) WriteMode
     hSetBinaryMode outFile True
     (_, imageStr) <- curlGetString s []
     hPutStr outFile imageStr
-    printf " ... Done!\n"
+    putStr " ... Done!\n"
   where
     filePath s = s =~ "[0-9]{13}.[A-Za-z0-9]+"
 
@@ -40,6 +39,6 @@ main = withCurlDo $ do
     args <- getArgs
     curl <- initialize
     bodyText <- curlGetString (last args) []
-    let images = nub $ (show bodyText =~ "http://images.4chan.org/[A-Za-z0-9]+/src/[0-9]{13}.[A-Za-z0-9]+")::[[String]]
-    printf "Page retrieved. %d images found.\n" (length images)
+    let images = nub $ (show bodyText =~ "http://images.4chan.org/[A-Za-z0-9]+/src/[0-9]{13}.[A-Za-z0-9]+")
+    putStr $ "Page retrieved. " ++ show (length images) ++ " images found.\n"
     mapM_ getImage (concat images)
