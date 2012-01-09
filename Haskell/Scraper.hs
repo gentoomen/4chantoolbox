@@ -67,14 +67,13 @@ main = do
     let images = concat $ nub $ show body =~ "http://images.4chan.org/[A-Za-z0-9]+/src/[0-9]{13}.[A-Za-z0-9]+"
     if (cc /= CurlOK)
         then putStrLn $ "Error: " ++ show cc ++ ". Exiting."
-        else
-            if quiet args
-            then withCurlDo $
-                forM_ images (\a -> getImage a (output args))
-            else withCurlDo $ do
-                putStrLn $ "Page retrieved. " ++ show (length images) ++ " images found."
-                forM_ images $ \a -> do
-                        got <- getImage a (output args)
-                        if got
-                            then putStrLn $ "Downloaded " ++ show a
-                            else putStrLn $ "Skipped    " ++ show a
+        else if quiet args
+                then withCurlDo $
+                    forM_ images (\a -> getImage a (output args))
+                else withCurlDo $ do
+                    putStrLn $ "Page retrieved. " ++ show (length images) ++ " images found."
+                    forM_ images $ \a -> do
+                            got <- getImage a (output args)
+                            if got
+                                then putStrLn $ "Downloaded " ++ show a
+                                else putStrLn $ "Skipped    " ++ show a
