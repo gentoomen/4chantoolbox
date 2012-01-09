@@ -27,7 +27,6 @@ import Network.Curl.Easy
 import Text.Regex.TDFA
 import System.Environment (getArgs)
 import System.Console.CmdArgs
-import System.IO
 import Download
 
 getImage :: String -> String -> IO ()
