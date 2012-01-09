@@ -5,16 +5,16 @@
 --
 -- This file has been placed in the public domain.
 
-import Control.Monad        (foldM)
-import qualified Data.Hash.MD5 as MD5
-import Data.List            (intercalate, nub)
-import qualified Data.Map as Map
-import Data.Maybe           (fromMaybe)
-import System.Environment   (getArgs)
-import System.Directory     (getDirectoryContents)
-import System.FilePath      (combine)
-import System.IO            (withBinaryFile, hGetContents, IOMode(ReadMode))
-import System.IO.PlafCompat (getFileStatus, isDirectory)
+import Control.Monad            (foldM)
+import qualified Data.Hash.MD5  as MD5
+import Data.List                (intercalate, nub)
+import qualified Data.Map       as Map
+import Data.Maybe               (fromMaybe)
+import System.Environment       (getArgs)
+import System.Directory         (getDirectoryContents)
+import System.FilePath          (combine)
+import System.IO                (withBinaryFile, hGetContents, IOMode(ReadMode))
+import System.IO.PlafCompat     (getFileStatus, isDirectory)
 
 type MD5HashMap = Map.Map Integer [FilePath]
 
@@ -37,9 +37,8 @@ hashDirectory hashes dirName = do
     hashAndPut hashes fileName = do
         hash <- hashFile fileName
         let fn = combine dirName fileName
-        existing <- maybe (return []) (notify hash fn) $ Map.lookup hash hashes
+        let existing = fromMaybe [] $ Map.lookup hash hashes
         return $ Map.insert hash (fn:existing) hashes
-    notify hash fileName = return
 
 -- hash multiple directories
 hashDirectories :: MD5HashMap -> [FilePath] -> IO MD5HashMap
