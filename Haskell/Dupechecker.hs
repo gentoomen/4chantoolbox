@@ -7,7 +7,7 @@
 
 import Control.Monad        (foldM)
 import qualified Data.Hash.MD5 as MD5
-import Data.List            (intersperse, nub)
+import Data.List            (intercalate, nub)
 import qualified Data.Map as Map
 import Data.Maybe           (fromMaybe)
 import System.Environment   (getArgs)
@@ -20,7 +20,7 @@ type MD5HashMap = Map.Map Integer [FilePath]
 
 -- hash a single file and return the MD5 sum
 hashFile :: String -> IO Integer
-hashFile fileName = do
+hashFile fileName =
     withBinaryFile fileName ReadMode $ \handle -> do
         contents <- hGetContents handle
         return $! MD5.md5i $ MD5.Str contents
@@ -39,26 +39,24 @@ hashDirectory hashes dirName = do
         let fn = combine dirName fileName
         existing <- maybe (return []) (notify hash fn) $ Map.lookup hash hashes
         return $ Map.insert hash (fn:existing) hashes
-    notify hash fileName existing = return existing
+    notify hash fileName = return
 
 -- hash multiple directories
 hashDirectories :: MD5HashMap -> [FilePath] -> IO MD5HashMap
-hashDirectories hashes dirs =
-    foldM hashDirectory hashes dirs
+hashDirectories = foldM hashDirectory
 
 -- generate a summary of duplicates
 generateSummary :: MD5HashMap -> IO ()
-generateSummary hashes = do
-    mapM_ summarize (Map.toList hashes)
+generateSummary hashes = mapM_ summarize (Map.toList hashes)
   where
     summarize (_, [x]) = return ()
-    summarize (hash, fileNames) = do
-        putStrLn $ (concat $ intersperse ", " fileNames) ++ " have the same hash."
+    summarize (hash, fileNames) =
+        putStrLn $ intercalate ", " fileNames ++ " have the same hash."
 
 main :: IO ()
 main = do
     argv <- getArgs
     let dirs = nub argv
     if dirs == [] 
-        then error "At least one directory should be specified."
+        then fail "At least one directory should be specified."
         else hashDirectories Map.empty dirs >>= generateSummary
