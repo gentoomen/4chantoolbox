@@ -19,71 +19,16 @@
 -- The rest should be distributed with the Haskell Platform.
 {-# LANGUAGE DeriveDataTypeable #-}
 
-import Control.Monad (unless, forM_)
-import Data.List (nub)
-import qualified Data.ByteString.Internal as B
-import qualified Data.ByteString          as B
-import Data.IORef
-import Foreign
-import Foreign.ForeignPtr
+import Control.Monad    (unless, forM_)
+import Data.List        (nub)
+import Data.ByteString as B (writeFile)
 import Network.Curl
 import Network.Curl.Easy
 import Text.Regex.TDFA
 import System.Environment (getArgs)
 import System.Console.CmdArgs
 import System.IO
-
--- pasted from Network.Curl.Download, by Don Stewart 
-data P = P !(Ptr Word8) !Int
-newtype URL = URL String
-
--- memcpy chunks of data into our bytestring.
-writer :: ((Ptr Word8, Int) -> IO ()) -> WriteFunction
-writer f src sz nelems _ = do
-    let n' = sz * nelems
-    f (castPtr src, fromIntegral n')
-    return n'
-
-gather :: IORef P -> WriteFunction
-gather r = writer $ \(src, m) -> do
-    P dest n <- readIORef r
-    dest' <- reallocBytes dest (n + m)
-    B.memcpy (dest' `plusPtr` n) src (fromIntegral m)
-    writeIORef r (P dest' (n + m))
-
-parseURL :: String -> Maybe URL
-parseURL s = Just (URL s) -- no parsing
-
-getFile :: URL -> [CurlOption] -> IO (Either String B.ByteString)
-getFile (URL url) flags = do
-    h <- initialize
-    let start = 1024
-    buf  <- mallocBytes start
-    ref  <- newIORef (P buf 0)
-    setopt h (CurlFailOnError True)
-    setDefaultSSLOpts h url
-    setopt h (CurlURL url)
-    setopt h (CurlWriteFunction (gather ref))
-    mapM_ (setopt h) flags
-    rc        <- perform h
-    P buf' sz <- readIORef ref
-    if rc /= CurlOK
-        then do
-            free buf'
-            return $ Left (show rc)
-        else do
-            fp <- newForeignPtr finalizerFree buf'
-            return (Right $! B.fromForeignPtr fp 0 (fromIntegral sz))
-
-openURI :: String -> IO (Either String B.ByteString)
-openURI s = case parseURL s of
-    Nothing  -> return $ Left $ "Malformed url: "++ s
-    Just url -> do
-        e <- getFile url []
-        return $ case e of
-             Left err   -> Left $ "Failed to connect: " ++ err
-             Right src  -> Right src
--- end snippets from Network.Curl.Download
+import Download
 
 getImage :: String -> String -> IO ()
 getImage s o = do 
