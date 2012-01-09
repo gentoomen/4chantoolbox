@@ -26,13 +26,22 @@ import Network.Curl
 import Network.Curl.Easy
 import Text.Regex.TDFA
 import System.Environment (getArgs)
+import System.Directory
 import System.Console.CmdArgs
 import Download
 
-getImage :: String -> String -> IO ()
-getImage s o = do 
-    Right a <- openURI s
-    B.writeFile (o ++ "/" ++ (s =~ "[0-9]{13}.[A-Za-z0-9]+")) a
+getImage :: String -> String -> IO Bool
+getImage s o = 
+    doesFileExist filename >>= \x ->
+        if x
+            then
+                return False
+            else do
+                Right a <- openURI s
+                B.writeFile filename a
+                return True
+  where 
+    filename = (o ++ "/" ++ (s =~ "[0-9]{13}.[A-Za-z0-9]+"))
 
 data Args = Args
     { output    :: String
@@ -45,22 +54,27 @@ defaultArgs = Args
         &= help "Where to download the images."     
         &= typ "DIR"
     , uri       = "boards.4chan.org/g/" 
-        &= help "The URI to scrape images from."    &= typ "URI"
+        &= help "The URI to scrape images from."
+        &= typ "URI"
     , quiet     = False                 
         &= help "If specified, nothing is printed."
     }   &= summary "4chan image scraper alpha beater."
 
-main :: IO ()
-main = withCurlDo $ do
-    args <- cmdArgs defaultArgs
-    curl <- initialize
-    bodyText <- curlGetString (uri args) []
-    let images = nub $ show bodyText =~ "http://images.4chan.org/[A-Za-z0-9]+/src/[0-9]{13}.[A-Za-z0-9]+"
-    unless (quiet args) $ putStrLn $ "Page retrieved. " ++ show (length images) ++ " images found."
-    forM_ (concat images) $
-        \a -> do 
-            getImage a (output args)
-            unless (quiet args) $ putStrLn $ "Downloaded " ++ show a ++ 
-                if output args == "./"
-                    then "."
-                    else "to" ++ show (output args) ++ "."
+main = do
+    args        <- cmdArgs defaultArgs
+    curl        <- initialize
+    (cc, body)  <- curlGetString (uri args) []
+    let images = concat $ nub $ show body =~ "http://images.4chan.org/[A-Za-z0-9]+/src/[0-9]{13}.[A-Za-z0-9]+"
+    if (cc /= CurlOK)
+        then putStrLn $ "Error: " ++ show cc ++ ". Exiting."
+        else
+            if quiet args
+            then withCurlDo $
+                forM_ images (\a -> getImage a (output args))
+            else withCurlDo $ do
+                putStrLn $ "Page retrieved. " ++ show (length images) ++ " images found."
+                forM_ images $ \a -> do
+                        got <- getImage a (output args)
+                        if got
+                            then putStrLn $ "Downloaded " ++ show a
+                            else putStrLn $ "Skipped    " ++ show a
