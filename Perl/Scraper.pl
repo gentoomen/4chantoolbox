@@ -11,7 +11,7 @@ while () {
     my $URL = get( $ARGV[0] );
 
     print "Page $ARGV[0] downloaded. Processing images.\n";
-    my @images = ($URL =~ m/\/\/images.4chan.org\/[a-zA-Z]\/src\/[0-9]{13}\.(?:jpg|png|gif|jpeg)/ig);
+    my @images = ($URL =~ m/\/\/images\.4chan\.org\/[a-zA-Z]\/src\/[0-9]{13}\.(?:jpg|png|gif|jpeg)/ig);
 
     print $URL;
 
@@ -25,7 +25,7 @@ while () {
         }
         else {
             print "Getting $image\n";
-            getstore($image, $imagename);
+            getstore("http:" . $image, $imagename);
         }
     }
 
