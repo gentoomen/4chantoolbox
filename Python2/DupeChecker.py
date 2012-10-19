@@ -35,6 +35,8 @@ def add_dir(dirpath):
 
 # get user input to determine if it's deletion time or not
 def get_choice():
+    if not ask:
+        return defChoice
     choose = ""
     validOptions = ( 'y', 'n', 'o', 'b', 'yes', 'no', 'other', 'both')
     while not choose in validOptions :
@@ -121,39 +123,39 @@ add_dir(directory)
 for i in range(len(filestats)):
     startfile = filestats[i]
     # be careful to check we haven't deleted either the file in a previous action
-    if os.path.isfile(startfile.wholepath):
+    if not os.path.isfile(startfile.wholepath):
+        continue
 
-        for e in range(i + 1, len(filestats)):
-            checkagainst = filestats[e]
-            # be careful to check we haven't deleted either the file in a previous action
-            if os.path.isfile(checkagainst.wholepath):
+    for e in range(i + 1, len(filestats)):
+        checkagainst = filestats[e]
+        # be careful to check we haven't deleted either the file in a previous action
+        if not os.path.isfile(checkagainst.wholepath):
+            continue
 
-                if startfile.size == checkagainst.size:
-                    showmatch(startfile, checkagainst)
+        if startfile.size != checkagainst.size:
+            continue
 
-                    # Generate md5s if necessary
-                    for f in (startfile, checkagainst):
-                        if f.md5 == "":
-                            f.get_md5()
+        showmatch(startfile, checkagainst)
+
+        # Generate md5s if necessary
+        for f in (startfile, checkagainst):
+            if f.md5 == "":
+                f.get_md5()
                 
-                    if startfile.md5 == checkagainst.md5:
-                        if dummy:
-                            print "=== Full md5 match found ==="
+        if startfile.md5 != checkagainst.md5:
+            print "No md5 match"
+            continue
 
-                        else:
-                            print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
-    
-                            # Allowance for the automatic overwrite flag
-                            if ask:
-                                choice = get_choice()
-                            else:
-				                choice = defChoice
+        if dummy:
+            print "=== Full md5 match found ==="
+            continue
 
-                            # In instructed to, delete the file    
-                            if choice in ('o', 'other', 'b', 'both'):
-                                remfile(checkagainst)
-                            if choice in ('y', 'yes', 'b', 'both') or not ask:
-                                remfile(startfile)
-                                break
-                    else:
-                        print "No md5 match."
+        print "Match found! Would you like to delete duplicate file " + startfile.wholepath + ""
+        choice = get_choice()
+
+        # In instructed to, delete the file    
+        if choice in ('o', 'other', 'b', 'both'):
+            remfile(checkagainst)
+        if choice in ('y', 'yes', 'b', 'both') or not ask:
+            remfile(startfile)
+            break
