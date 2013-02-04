@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 
-## Written by LAMMJohnson
-## If something goes wrong, it's your fault so eat shit.
+## Written by LAMMJohnson for the Gentoomen 4chantoolbox project
+## Licensed under the GPLv3
 
 import os, sys, urllib, re, getopt
 from time import time, sleep
