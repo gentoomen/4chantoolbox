@@ -62,7 +62,7 @@ Flags:
 def main():
     short_opts = "hn:r:"
     long_opts = "help number regex".split()
-    namematches = []
+    regexes = []
     quantity = 1
 
     # Parse arguments
@@ -78,23 +78,23 @@ def main():
         elif o == "-n" or o == "--number":
             quantity = int(a)
         elif o == "-r" or o == "--regex":
-            namematches.append(a)
+            regexes.append(a)
         else:
             errout("Unrecognised argument " + a)
 
     # Handle incorrect options
-    if namematches == []:
+    if regexes == []:
         errout("No regexes to match supplied.")
     if quantity < 1:
         errout("Error :: Instructed to find less than 1 match")
 
     # Report work to be done to user
     print "Finding", quantity, "matches of:"
-    for s in namematches:
+    for s in regexes:
         print s
 
     # Generate matches and report findings
-    matches = find_trips(namematches, quantity)
+    matches = find_trips(regexes, quantity)
     for num, trip in matches:
         print num, "hashes to", trip
 
