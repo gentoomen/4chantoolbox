@@ -5,55 +5,98 @@
 # Source: http://www.mm-rs.org/forums/topic/19070-your-name-in-a-tripcode
 #
 
-import re, string, crypt, sys, time
+import re, string, crypt, sys, time, getopt
 
-## SETTINGS
-TRIPS = 2 # number of trips to generate
+def errout(msg):
+    print msg, "See", sys.argv[0], "-h for usage instructions"
+    exit(0)
+
+def finder(regexes, quantity):
+    matches = []
+    i = 1
+    while len(matches) < quantity:
+        generated_trip = mktripcode(str(i))
+        if i % 100000 == 0:
+            print "Generated", i, "tripcodes..."
+        for regex in regexes:
+            if re.search(regex, generated_trip):
+                print "FOUND tripcode:", i, "=>", generated_trip
+                matches.append((i, "#" + generated_trip))
+        i = i + 1
+    return matches
 
 def mktripcode(pw):
     pw = pw.decode('utf_8', 'ignore') \
-            .encode('shift_jis', 'ignore') \
-            .replace('"', '&quot;') \
-            .replace("'", '')\
-            .replace('<', '&lt;')\
-            .replace('>', '&gt;')\
-            .replace(',', ',')
+           .encode('shift_jis', 'ignore') \
+           .replace('"', '&quot;') \
+           .replace("'", '')\
+           .replace('<', '&lt;')\
+           .replace('>', '&gt;')\
+           .replace(',', ',')
     salt = (pw + '...')[1:3]
     salt = re.compile('[^\.-z]').sub('.', salt)
     salt = salt.translate(string.maketrans(':;<=>?@[\\]^_`', 'ABCDEFGabcdef'))
     trip = crypt.crypt(pw, salt)[-10:]
     return trip
 
-def finder(trp):
-    global TRIPS
-    x,y,i = 0,0,1
-    total_trips = {}
-    start = time.time()
-    while i <= TRIPS:
-        if re.search(trp, str.lower(mktripcode(str(x))))>-1:
-            print "#FOUND tripcode %d" % i
-            total_trips['#'+ str(x)] = mktripcode(str(x))
-            i = i+1
-        elif x==y:
-            print "Generating.." + str(x)
-            y=y+100000
-        x=x+1
-    return total_trips
+def usage():
+    print sys.argv[0], "is a tripcode generation program"
+    print """
+You must provide at least one regex to match against, and
+this program will find a number of tripcodes that match
+that regex for you.
 
+Flags:
+  -h or --help
+      Print this help text and exit
+  -n <#> or --number <#>     :: (Default 1)
+      Number of matches to find before exiting
+  -r <str> or --regex <str>
+      Provide regex to match against. You may provide multiple
+      regexes and they will all be matched against. You MUST provide
+      at least one regex to match against
+"""
 
-username = sys.argv[1]
-carry_on = True
+def main():
+    short_opts = "hn:r:"
+    long_opts = "help number regex".split()
+    namematches = []
+    quantity = 1
 
-if len(username) > 4:
-    choice = raw_input("this can take a long time, are you sure? (y/n): ")
-    if (choice in ('y','Y','yes','YES','Yes')):
-        carry_on = True
-    else:
-        carry_on = False
+    # Parse arguments
+    try:
+        opts, args = getopt.gnu_getopt(sys.argv, short_opts, long_opts)
+    except:
+        errout("Error parsing args.")
 
-if carry_on:
-    data = finder(username)
-    print "\nAll done:\n"
-    for k, v in data.iteritems():
-        print(k + ': ' + v)
-print "\nuse the #num as password in the name field to use the tripcode.\nEnjoy!\n"
+    for o, a in opts:
+        if o == "-h" or o == "--help":
+            usage()
+            return 0
+        elif o == "-n" or o == "--number":
+            quantity = int(a)
+        elif o == "-r" or o == "--regex":
+            namematches.append(a)
+        else:
+            errout("Unrecognised argument " + a)
+
+    # Handle incorrect options
+    if namematches == []:
+        errout("No regexes to match supplied.")
+    if quantity < 1:
+        errout("Error :: Instructed to find less than 1 match")
+
+    # Report work to be done to user
+    print "Finding", quantity, "matches of:"
+    for s in namematches:
+        print s
+
+    # Generate matches
+    matches = finder(namematches, quantity)
+
+    # Report findings
+    for num, trip in matches:
+        print num, "hashes to", trip
+
+if __name__ == "__main__":
+    main()
