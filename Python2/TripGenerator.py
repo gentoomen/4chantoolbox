@@ -7,7 +7,9 @@
 #
 # Source: http://www.mm-rs.org/forums/topic/19070-your-name-in-a-tripcode
 
-import re, string, crypt, sys, time, getopt
+import re, string, crypt, sys, time, getopt, signal
+
+SIGINT_RECIEVED = False
 
 def errout(msg):
     print msg, "See", sys.argv[0], "-h for usage instructions"
@@ -17,6 +19,9 @@ def find_trips(regexes, quantity):
     matches = []
     i = 1
     while len(matches) < quantity:
+        if SIGINT_RECIEVED:
+            print "Exiting gracefully on SIGINT."
+            return matches
         generated_trip = mktripcode(str(i))
         if i % 100000 == 0:
             print "Generated", i, "tripcodes..."
@@ -40,6 +45,12 @@ def mktripcode(pw):
     salt = salt.translate(string.maketrans(':;<=>?@[\\]^_`', 'ABCDEFGabcdef'))
     trip = crypt.crypt(pw, salt)[-10:]
     return trip
+
+def sigint_handler(sig, _):
+    ''' For handling sigint messages gracefully '''
+    global SIGINT_RECIEVED
+    print "SIGINT received."
+    SIGINT_RECIEVED = True
 
 def usage():
     print sys.argv[0], "is a tripcode generation program"
@@ -68,6 +79,9 @@ def main():
     long_opts = "help number regex".split()
     regexes = []
     quantity = 1
+
+    # Handle sigint correctly
+    signal.signal(signal.SIGINT, sigint_handler)
 
     # Parse arguments
     try:
@@ -99,8 +113,11 @@ def main():
 
     # Generate matches and report findings
     matches = find_trips(regexes, quantity)
-    for num, trip in matches:
-        print num, "hashes to", trip
+    if len(matches) == 0:
+        print "No matches found."
+    else:
+        for num, trip in matches:
+            print num, "hashes to", trip
 
 if __name__ == "__main__":
     main()
