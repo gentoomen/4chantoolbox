@@ -12,10 +12,16 @@ import re, string, crypt, sys, time, getopt, signal
 SIGINT_RECIEVED = False
 
 def errout(msg):
+    ''' Display error message, provide usage instructions and exit '''
     print msg, "See", sys.argv[0], "-h for usage instructions"
     exit(0)
 
 def find_trips(regexes, quantity):
+    '''
+    Loop to continuously try to find @quantity instances of @regexes
+    by iterating a string and hashing using mktripcode.
+    ret: List of tuples - strings and matching strings they hash to
+    '''
     matches = []
     i = 1
     while len(matches) < quantity:
@@ -33,6 +39,7 @@ def find_trips(regexes, quantity):
     return matches
 
 def mktripcode(pw):
+    ''' Convert a @pw string into a 4chan tripcode hash '''
     pw = pw.decode('utf_8', 'ignore')\
            .encode('shift_jis', 'ignore')\
            .replace('"', '&quot;')\
@@ -53,6 +60,7 @@ def sigint_handler(sig, _):
     SIGINT_RECIEVED = True
 
 def usage():
+    ''' Display help/usage text and then exit '''
     print sys.argv[0], "is a tripcode generation program"
     print """
 You must provide at least one regex to match against, and
