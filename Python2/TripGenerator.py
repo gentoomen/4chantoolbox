@@ -33,9 +33,9 @@ def find_trips(regexes, quantity):
     return matches
 
 def mktripcode(pw):
-    pw = pw.decode('utf_8', 'ignore') \
-           .encode('shift_jis', 'ignore') \
-           .replace('"', '&quot;') \
+    pw = pw.decode('utf_8', 'ignore')\
+           .encode('shift_jis', 'ignore')\
+           .replace('"', '&quot;')\
            .replace("'", '')\
            .replace('<', '&lt;')\
            .replace('>', '&gt;')\
@@ -73,8 +73,10 @@ Flags:
   case-insensitive matching.
 """
     print "Example Usage:", sys.argv[0], "-r '(?i)gentoo' -n 3"
+    exit(0)
 
 def main():
+    ''' Main function '''
     short_opts = "hn:r:"
     long_opts = "help number regex".split()
     regexes = []
@@ -92,7 +94,6 @@ def main():
     for o, a in opts:
         if o == "-h" or o == "--help":
             usage()
-            return 0
         elif o == "-n" or o == "--number":
             quantity = int(a)
         elif o == "-r" or o == "--regex":
