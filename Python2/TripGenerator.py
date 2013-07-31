@@ -1,9 +1,11 @@
 #!/usr/bin/python2
 # TripGenerator.py
-# Writes the # and it's tripcode to a file
+#
+# Modified from original source by LAMMJohnson
+# Licensed under the GPLv3 pending approval from original author, who
+# appears to have released it without license (completely restricted)
 #
 # Source: http://www.mm-rs.org/forums/topic/19070-your-name-in-a-tripcode
-#
 
 import re, string, crypt, sys, time, getopt
 
@@ -11,7 +13,7 @@ def errout(msg):
     print msg, "See", sys.argv[0], "-h for usage instructions"
     exit(0)
 
-def finder(regexes, quantity):
+def find_trips(regexes, quantity):
     matches = []
     i = 1
     while len(matches) < quantity:
@@ -91,10 +93,8 @@ def main():
     for s in namematches:
         print s
 
-    # Generate matches
-    matches = finder(namematches, quantity)
-
-    # Report findings
+    # Generate matches and report findings
+    matches = find_trips(namematches, quantity)
     for num, trip in matches:
         print num, "hashes to", trip
 
