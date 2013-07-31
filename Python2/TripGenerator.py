@@ -57,7 +57,11 @@ Flags:
       Provide regex to match against. You may provide multiple
       regexes and they will all be matched against. You MUST provide
       at least one regex to match against
+
+  Hint: You may wish to prepend your searches with (?i) to enable
+  case-insensitive matching.
 """
+    print "Example Usage:", sys.argv[0], "-r '(?i)gentoo' -n 3"
 
 def main():
     short_opts = "hn:r:"
