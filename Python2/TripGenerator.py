@@ -7,7 +7,8 @@
 #
 # Source: http://www.mm-rs.org/forums/topic/19070-your-name-in-a-tripcode
 # Optimized by The-Soulless
-import re, crypt, sys, signal, string, crypt, getopt
+import crypt, getopt, re, signal, string, sys
+
 sys.setcheckinterval(999999)
 SIGINT_RECIEVED = False
 
