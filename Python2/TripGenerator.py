@@ -6,9 +6,9 @@
 # appears to have released it without license (completely restricted)
 #
 # Source: http://www.mm-rs.org/forums/topic/19070-your-name-in-a-tripcode
-
-import re, string, crypt, sys, time, getopt, signal
-
+# Optimized by The-Soulless
+import re, crypt, sys, signal, string, crypt, getopt
+sys.setcheckinterval(999999)
 SIGINT_RECIEVED = False
 
 def errout(msg):
@@ -24,16 +24,14 @@ def find_trips(regexes, quantity):
     '''
     matches = []
     i = 1
-    while len(matches) < quantity:
+    lregexes = regexes
+    lquantity = quantity
+    while len(matches) < lquantity:
         if SIGINT_RECIEVED:
-            print "Exiting gracefully on SIGINT."
             return matches
         generated_trip = mktripcode(str(i))
-        if i % 100000 == 0:
-            print "Generated", i, "tripcodes..."
-        for regex in regexes:
+        for regex in lregexes:
             if re.search(regex, generated_trip):
-                print "FOUND tripcode:", i, "=>", generated_trip
                 matches.append((i, "#" + generated_trip))
         i = i + 1
     return matches
@@ -51,12 +49,13 @@ def mktripcode(pw):
     salt = re.compile('[^\.-z]').sub('.', salt)
     salt = salt.translate(string.maketrans(':;<=>?@[\\]^_`', 'ABCDEFGabcdef'))
     trip = crypt.crypt(pw, salt)[-10:]
+    trip = " " + trip
     return trip
 
 def sigint_handler(sig, _):
     ''' For handling sigint messages gracefully '''
     global SIGINT_RECIEVED
-    print "SIGINT received."
+    print "\nSIGINT received."
     SIGINT_RECIEVED = True
 
 def usage():
@@ -85,6 +84,7 @@ Flags:
 
 def main():
     ''' Main function '''
+    t=time.time()
     short_opts = "hn:r:"
     long_opts = "help number regex".split()
     regexes = []
@@ -127,6 +127,5 @@ def main():
     else:
         for num, trip in matches:
             print num, "hashes to", trip
-
 if __name__ == "__main__":
     main()
