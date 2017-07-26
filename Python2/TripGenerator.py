@@ -84,7 +84,6 @@ Flags:
 
 def main():
     ''' Main function '''
-    t=time.time()
     short_opts = "hn:r:"
     long_opts = "help number regex".split()
     regexes = []
